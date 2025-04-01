@@ -45,9 +45,24 @@ int main() {
 
     freestream.updateQ();
 
+    struct_residual residual;
+    residual.p1.assign(size.num_cells, -101);
+    residual.p2.assign(size.num_cells, -101);
+    residual.p3.assign(size.num_cells, -101);
+    residual.p4.assign(size.num_cells, -101);
+
     //////////////////////// Run Simulation ////////////////////////
     for (int ndx = 1; ndx <= inputs.nmax; ndx++) {
-        ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &size, &inputs, &freestream, &BC, ndx);
+        ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC);
+
+        // Print Information to terminal 
+        if ((ndx % inputs.monitor_step) == 0) {
+            //double max1 = * std::max_element(residual.p1.begin(),residual.p1.end());
+            std::cout << "iter: " << ndx << " res: " << *std::max_element(residual.p1.begin(),residual.p1.end()) << " ";
+            std::cout << ", " << *std::max_element(residual.p2.begin(),residual.p2.end()) << " ";
+            std::cout << ", " << *std::max_element(residual.p3.begin(),residual.p3.end()) << " ";
+            std::cout << ", " << *std::max_element(residual.p4.begin(),residual.p4.end()) << std::endl;
+        }
     }
     // std::ofstream myfile;
     // myfile.open ("centroids.txt");

@@ -3,6 +3,7 @@
     order = 1
     islimiteron = true
     nmax = 100
+    monitor_step = 1
     output_step = 1
     grid_file = ../grid_file.in
 
