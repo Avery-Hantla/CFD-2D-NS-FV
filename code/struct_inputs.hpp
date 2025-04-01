@@ -6,6 +6,7 @@
         int order; 
         bool islimiteron;
         int nmax; 
+        int monitor_step;
         int output_step;
         std::string grid_file; 
     };
