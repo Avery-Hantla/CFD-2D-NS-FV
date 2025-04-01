@@ -2,9 +2,9 @@
     CFL = 0.75
     order = 1
     islimiteron = true
-    nmax = 100
-    monitor_step = 1
-    output_step = 1
+    nmax = 20
+    monitor_step = 2
+    output_step = 20
     grid_file = ../grid_file.in
 
 [flow]
@@ -15,5 +15,5 @@
     v = 4
 
 [BC]
-    freestream_patch = 0
-    wall_patch = -1
+    BC1 = SLIP_WALL
+  
