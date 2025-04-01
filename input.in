@@ -16,3 +16,4 @@
 [BC]
     freestream_patch = 0
     wall_patch = -1
+    test
