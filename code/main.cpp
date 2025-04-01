@@ -19,6 +19,7 @@
 #include "read_inputs.cpp"
 #include "readmesh.cpp"
 #include "ssp_rk2.cpp"
+#include "save_sol.cpp"
 
 int main() { 
     //////////// Initilize Variables, Objects, Structs /////////////
@@ -33,9 +34,15 @@ int main() {
     struct_inputs inputs; 
     struct_BC BC;
     
-    ///////////////// Load Variables and Read Mesh /////////////////
+    ////////// Load Variables, Read Mesh, Set up Outputs ///////////
     read_inputs(&freestream, &inputs, &BC); // Load Input variables
     readmesh(&mesh,inputs.grid_file,&size, &BC); // Import Mesh
+
+    std::ofstream output;
+    output.open ("../sol/output.dat");
+    if (output.is_open()) {
+        output << "#iter, res1, res2, res3, res4" << std::endl;
+    }
 
     ////////////////////// Initilize Domain ////////////////////////
     Qbar.init(size.num_cells, &freestream);
@@ -55,21 +62,9 @@ int main() {
     for (int ndx = 1; ndx <= inputs.nmax; ndx++) {
         ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC);
 
-        // Print Information to terminal 
-        if ((ndx % inputs.monitor_step) == 0) {
-            //double max1 = * std::max_element(residual.p1.begin(),residual.p1.end());
-            std::cout << "iter: " << ndx << " res: " << *std::max_element(residual.p1.begin(),residual.p1.end()) << " ";
-            std::cout << ", " << *std::max_element(residual.p2.begin(),residual.p2.end()) << " ";
-            std::cout << ", " << *std::max_element(residual.p3.begin(),residual.p3.end()) << " ";
-            std::cout << ", " << *std::max_element(residual.p4.begin(),residual.p4.end()) << std::endl;
-        }
+        // Monitor and Output Solution
+        save(&Qbar, &residual, &inputs, &size, ndx);
     }
-    // std::ofstream myfile;
-    // myfile.open ("centroids.txt");
-    // for (int idx = 0; idx < size.num_cells; idx++) {
-    //     myfile << mesh.cell_centerx[idx] << " " << mesh.cell_centery[idx] << std::endl;
-    // }
-    // myfile.close();
 
     return 0;
 }
