@@ -1,0 +1,18 @@
+[inputs]
+    CFL = 0.75
+    order = 1
+    islimiteron = true
+    nmax = 100
+    output_step = 1
+    grid_file = ../grid_file.in
+
+[flow]
+    gamma = 1.4
+    P = 1
+    rho = 2
+    u = 3
+    v = 4
+
+[BC]
+    freestream_patch = 0
+    wall_patch = -1
