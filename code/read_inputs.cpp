@@ -49,14 +49,38 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC) {
                     std::cout << "  v = " << freestream->v << std::endl;
                 }
                 if (in_string1 == "[BC]") { // BC Flow section
+                    std::cout << "[BC] \n";
                     for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
-                        (in_string1 == "freestream_patch") ? BC->freestream_patch = stoi(in_string2)-1: false;
-                        (in_string1 == "wall_patch") ? BC->wall_patch = stoi(in_string2)-1: false;
+                        if (in_string1 == "BC1") {
+                            if (in_string2 == "FREESTREAM") {
+                                std::cout << "  BC1 = FREESTREAM \n";
+                                BC->BC1 = -1;
+                            }
+                            if (in_string2 == "SLIP_WALL") {
+                                std::cout << "  BC1 = SLIP_WALL \n";
+                                BC->BC1 = -2;
+                            }
+                            if (in_string2 == "EXTRAPOLATION") {
+                                std::cout << "  BC1 = EXTRAPOLATION \n";
+                                BC->BC1 = -3;
+                            }
+                        }
+                        if (in_string1 == "BC2") {
+                            if (in_string2 == "FREESTREAM") {
+                                std::cout << "  BC2 = FREESTREAM \n";
+                                BC->BC2 = -1;
+                            }
+                            if (in_string2 == "SLIP_WALL") {
+                                std::cout << "  BC2 = SLIP_WALL \n";
+                                BC->BC2 = -2;
+                            }
+                            if (in_string2 == "EXTRAPOLATION") {
+                                std::cout << "  BC2 = EXTRAPOLATION \n";
+                                BC->BC2 = -3;
+                            }
+                        }
                     }
-                    std::cout << "[BC] \n";
-                    std::cout << "  freestream_patch = " << BC->freestream_patch+1 << std::endl;
-                    std::cout << "  wall_patch = " << BC->wall_patch+1 << std::endl;
                 }
             }
         } else {

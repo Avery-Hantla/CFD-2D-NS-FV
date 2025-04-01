@@ -27,12 +27,12 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qfaces_c1, class_Q
 
                 cell_2 = mesh->face_cell2[idx];
                 // Apply BC
-                if (cell_2 == BC->freestream_patch) {
+                if (cell_2 == -1) { // Freestream BC
                     Qfaces_c2->p1[idx] = freestream->Q1;
                     Qfaces_c2->p2[idx] = freestream->Q2;
                     Qfaces_c2->p3[idx] = freestream->Q3;
                     Qfaces_c2->p4[idx] = freestream->Q4;
-                } else if (cell_2 == BC->wall_patch) {
+                } else if (cell_2 == -2) { // Wall BC
                     wall_BC.rho = Qbar->rho[cell_2];
                     wall_BC.P = Qbar->P[cell_2];
                     Vn = Qbar->u[cell_2]*mesh->face_nx[idx] + Qbar->v[cell_2]*mesh->face_ny[idx];
@@ -44,6 +44,11 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qfaces_c1, class_Q
                     Qfaces_c2->p2[idx] = wall_BC.Q2;
                     Qfaces_c2->p3[idx] = wall_BC.Q3;
                     Qfaces_c2->p4[idx] = wall_BC.Q4;
+                } else if (cell_2 == -3) { // Extrapolation BC
+                    Qfaces_c2->p1[idx] = Qbar->p1[cell_1];
+                    Qfaces_c2->p2[idx] = Qbar->p2[cell_1];
+                    Qfaces_c2->p3[idx] = Qbar->p3[cell_1];
+                    Qfaces_c2->p4[idx] = Qbar->p4[cell_1];
                 } else {
                     Qfaces_c2->p1[idx] = Qbar->p1[cell_2];
                     Qfaces_c2->p2[idx] = Qbar->p2[cell_2];

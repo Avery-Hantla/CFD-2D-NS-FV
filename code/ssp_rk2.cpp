@@ -21,7 +21,7 @@ void ssp_rk2(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_
 
     // Compute Time Step
     double dt;
-    dt = 0.000001;
+    dt = 0.001;
 
     // Calcualte Q star
     res(residual, mesh, size, inputs, Qbar, Qface_c1, Qface_c2, freestream, BC);

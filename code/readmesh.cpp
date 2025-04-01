@@ -49,7 +49,13 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     for (int idx = 0; idx < num_faces; idx++) {
       grid_in >> i1 >> i2; 
       mesh->face_cell1.push_back(i1-1);
-      mesh->face_cell2.push_back(i2-1);
+      if (i2-1 == -1) {
+        mesh->face_cell2.push_back(BC->BC1);
+      } else if (i2-1 == -2) {
+        mesh->face_cell2.push_back(BC->BC2);
+      } else {
+        mesh->face_cell2.push_back(i2-1);
+      }
 
       // Assign Faces to Cell Array 
       mesh->cell_faces[(i1-1)*6+(mesh->cell_face_count[(i1-1)])] = idx;
@@ -308,4 +314,16 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   size->num_points = num_points;
   size->num_faces = num_faces;
   size->num_cells = num_cells;
+
+  // Save metric metrics to file
+
+  std::ofstream output;
+  output.open ("../mesh/mesh.dat");
+  if (output.is_open()) {
+    for (int idx = 0; idx < size->num_cells; idx++) {
+      output << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << std::endl;    }
+  } else {
+    std::cout << "ERROR: Cannot Save File \n";
+  }
+  output.close();
 }
