@@ -123,12 +123,12 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
 
   double meanx, meany, temp[12], temp1x, temp2x, temp1y, temp2y;
   double center_x, center_y;
-  bool foundtemp1, foundtemp2;
   for (int idx = 0; idx < num_cells; idx++) {
-    int vertex_count = mesh->cell_face_count[idx];
-    double cell_pointsx[vertex_count], cell_pointsy[vertex_count];
+    int vertex_count = mesh->cell_face_count[idx], found_count = 0;
+    double cell_pointsx[vertex_count] = {0}, cell_pointsy[vertex_count] = {0};
     // Find points for each cell and makes sures there are no duplicates 
     for (int jdx = 0; jdx < 6; jdx ++) { // Split cell up
+      bool foundtemp1 = false, foundtemp2 = false;
       if (mesh->find_cell_face(idx,jdx) == -101) {
         break;
       }
@@ -139,22 +139,26 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       temp2y = mesh->y[mesh->face_point2[mesh->cell_faces[idx*6 + jdx]]];
 
       for (int zdx = 0; zdx < vertex_count; zdx ++) {
-        if ((cell_pointsx[zdx] = temp1x) && (cell_pointsy[zdx] = temp1y)) {
+        if ((cell_pointsx[zdx] == temp1x) && (cell_pointsy[zdx] == temp1y)) {
           foundtemp1 = true;
+          break;
         }
       }
       if (foundtemp1 == false) {
-        cell_pointsx[jdx] = temp1x;
-        cell_pointsy[jdx] = temp1y;
+        cell_pointsx[found_count] = temp1x;
+        cell_pointsy[found_count] = temp1y;
+        found_count ++;
       }
       for (int zdx = 0; zdx < vertex_count; zdx ++) {
-        if ((cell_pointsx[zdx] = temp2x) && (cell_pointsy[zdx] = temp2y)) {
+        if ((cell_pointsx[zdx] == temp2x) && (cell_pointsy[zdx] == temp2y)) {
           foundtemp2 = true;
+          break;
         }
       }
       if (foundtemp2 == false) {
-        cell_pointsx[jdx] = temp2x;
-        cell_pointsy[jdx] = temp2y;
+        cell_pointsx[found_count] = temp2x;
+        cell_pointsy[found_count] = temp2y;
+        found_count ++;
       }
     }
 
@@ -315,10 +319,11 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   size->num_faces = num_faces;
   size->num_cells = num_cells;
 
-  // Save metric metrics to file
+  /////////////////////// Save metric metrics to file ///////////////////////
 
+  // Cell Centroids
   std::ofstream output;
-  output.open ("../mesh/mesh.dat");
+  output.open ("../mesh/cell_data.dat");
   if (output.is_open()) {
     for (int idx = 0; idx < size->num_cells; idx++) {
       output << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << std::endl;    }
@@ -326,4 +331,22 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     std::cout << "ERROR: Cannot Save File \n";
   }
   output.close();
+
+  // Faces
+  output.open ("../mesh/face_data.dat");
+  if (output.is_open()) {
+    output << "# face point 1 x, face point 1 y, face point 2 x, face point 2y, face nx, face ny, face center x, face center y" << std::endl;
+    for (int idx = 0; idx < size->num_faces; idx++) {
+      output << mesh->x[mesh->face_point1[idx]] << " " <<mesh->y[mesh->face_point1[idx]] << " "; 
+      output << mesh->x[mesh->face_point2[idx]] << " " <<mesh->y[mesh->face_point2[idx]] << " "; 
+
+      output << mesh->face_nx[idx] << " " << mesh->face_ny[idx] <<  " "; 
+
+      output << mesh->face_centerx[idx] << " " << mesh->face_centery[idx] << std::endl; 
+    }
+  } else {
+    std::cout << "ERROR: Cannot Save File \n";
+  }
+  output.close();
+
 }
