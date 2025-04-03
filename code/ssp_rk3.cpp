@@ -28,10 +28,13 @@ void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_
         c1 = mesh->face_cell1[idx];
         c2 = mesh->face_cell2[idx];
 
-        dt[c1] += (2*inputs->CFL*mesh->cell_vol[c1])/((std::abs(Qface_c1->Vn_avg[idx])+Qface_c1->c_avg[idx])*mesh->face_area[idx]);
+        dt[c1] += (std::abs(Qface_c1->Vn_avg[idx])+Qface_c1->c_avg[idx])*mesh->face_area[idx];
         if (c2 >= 0){
-            dt[c2] += (2*inputs->CFL*mesh->cell_vol[c2])/((std::abs(Qface_c2->Vn_avg[idx])+Qface_c2->c_avg[idx])*mesh->face_area[idx]);
+            dt[c2] += (std::abs(Qface_c2->Vn_avg[idx])+Qface_c2->c_avg[idx])*mesh->face_area[idx];
         }
+    }
+    for (int idx = 0; idx < size->num_cells; idx ++) {
+        dt[idx] = (2*inputs->CFL*mesh->cell_vol[idx])/dt[idx];
     }
 
     // Calcualte Q star 1
