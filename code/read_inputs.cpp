@@ -3,37 +3,69 @@
 #include "class_flow.hpp"
 #include "struct_BC.hpp"
 #include "struct_inputs.hpp"
+#include "struct_time.hpp"
+#include "struct_report.hpp"
 
-void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC) {
+void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, struct_time* time, struct_report* report) {
     std::ifstream input_file;
         input_file.open ("../input.in");
         if (input_file.is_open()) {
             std::cout << "Reading input.in \n";
             std::string in_string1, in_string2, throw_away;
-            for (int idx = 0; idx < 3; idx++) { // Look for inputs and flow
+            for (int idx = 0; idx < 7; idx++) { // Look for inputs and flow
                 input_file >> in_string1;
+                /////////////////////////////////// Inputs ///////////////////////////////////
                 if (in_string1 == "[inputs]") { // Input inputs secction
-                    for (int jdx = 0; jdx < 3*8; jdx+=3) { // Less than 3*(num of inputs)
+                    for (int jdx = 0; jdx < 3*6; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
-                        (in_string1 == "CFL") ? inputs->CFL = stod(in_string2): false;
-                        (in_string1 == "order") ? inputs->order = stoi(in_string2): false;
+                        (in_string1 == "solution_order") ? inputs->order = stoi(in_string2): false;
                         (in_string1 == "islimiteron") ? (in_string1 == "true") ? inputs->islimiteron = true: inputs->islimiteron = false : false;
                         (in_string1 == "nmax") ? inputs->nmax = stoi(in_string2): false;
                         (in_string1 == "monitor_step") ? inputs->monitor_step = stoi(in_string2): false;
                         (in_string1 == "output_step") ? inputs->output_step = stoi(in_string2): false;
-                        (in_string1 == "grid_file") ? inputs->grid_file = in_string2: "false";
                         (in_string1 == "restart") ? inputs->restart = stoi(in_string2): false;
                     }
                     std::cout << "[inputs] \n";
-                    std::cout << "  CFL = " << inputs->CFL << std::endl;
-                    std::cout << "  restart = " << inputs->restart << std::endl;
-                    std::cout << "  order = " << inputs->order << std::endl;
-                    std::cout << "  islimiteron = " << inputs->islimiteron << std::endl;
                     std::cout << "  nmax = " << inputs->nmax << std::endl;
                     std::cout << "  monitor_step = " << inputs->monitor_step << std::endl;
                     std::cout << "  output_step = " << inputs->output_step << std::endl;
+                    std::cout << "  solution_order = " << inputs->order << std::endl;
+                    std::cout << "  islimiteron = " << inputs->islimiteron << std::endl;
+                    std::cout << "  restart = " << inputs->restart << std::endl;
+                }
+                /////////////////////////////////// Grid ///////////////////////////////////
+                if (in_string1 == "[grid]") { // Input inputs secction
+                    for (int jdx = 0; jdx < 3*1; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
+                        (in_string1 == "grid_file") ? inputs->grid_file = in_string2: "false";
+                    }
+                    std::cout << "[grid] \n";
                     std::cout << "  grid_file = " << inputs->grid_file<< std::endl;
                 }
+                /////////////////////////////////// Equations ///////////////////////////////////
+                if (in_string1 == "[equations]") { // Input inputs secction
+                    std::cout << "[equations] \n";
+                    for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
+                        if (in_string1 == "eqn") {
+                            if (in_string2 == "EULER") {
+                                std::cout << "  eqn = EULER \n";
+                                inputs->eqn = 1;
+                            }
+                        }
+                        if (in_string1 == "flux_solver") {
+                            if (in_string2 == "RUSANOV") {
+                                std::cout << "  flux_solver = RUSANOV \n";
+                                inputs->flux_solver = 1;
+                            }
+                            if (in_string2 == "ROE") {
+                                std::cout << "  flux_solver = ROE \n";
+                                inputs->flux_solver = 2;
+                            }
+                        }
+                    }
+                }
+                /////////////////////////////////// Flow ///////////////////////////////////
                 if (in_string1 == "[flow]") { // flow Flow section
                     for (int jdx = 0; jdx < 3*5; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
@@ -50,6 +82,46 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC) {
                     std::cout << "  u = " << freestream->u << std::endl;
                     std::cout << "  v = " << freestream->v << std::endl;
                 }
+                /////////////////////////////////// Time ///////////////////////////////////
+                if (in_string1 == "[time]") { // Input inputs secction
+                    std::cout << "[time] \n";
+                    for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
+                        (in_string1 == "CFL") ? time->CFL = stod(in_string2): false;
+                        if (in_string1 == "time_scheme") {
+                            if (in_string2 == "SSP_RK2") {
+                                std::cout << "  scheme = SSP_RK2 \n";
+                                time->scheme = 1;
+                            }
+                            if (in_string2 == "SSP_RK3") {
+                                std::cout << "  scheme = SSP_RK3 \n";
+                                time->scheme = 2;
+                            }
+                        }
+
+                    }
+                    std::cout << "  CFL = " << time->CFL << std::endl;
+                }
+                /////////////////////////////////// report ///////////////////////////////////
+                if (in_string1 == "[report]") { // flow Flow section
+                    for (int jdx = 0; jdx < 3*6; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
+                        (in_string1 == "u") ? report->u = stod(in_string2): false;
+                        (in_string1 == "v") ? report->v = stod(in_string2): false;
+                        (in_string1 == "P") ? report->P = stod(in_string2): false;
+                        (in_string1 == "rho") ? report->rho = stod(in_string2): false;
+                        (in_string1 == "area") ? report->area = stod(in_string2): false;
+                        (in_string1 == "length") ? report->length = stod(in_string2): false;
+                    }
+                    std::cout << "[report] \n";
+                    std::cout << "  u = " << report->u << std::endl;
+                    std::cout << "  v = " << report->v << std::endl;
+                    std::cout << "  P = " << report->P << std::endl;
+                    std::cout << "  rho = " << report->rho << std::endl;
+                    std::cout << "  area = " << report->area << std::endl;
+                    std::cout << "  length = " << report->length << std::endl;
+                }
+                /////////////////////////////////// BC ///////////////////////////////////
                 if (in_string1 == "[BC]") { // BC Flow section
                     std::cout << "[BC] \n";
                     for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
