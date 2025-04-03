@@ -13,7 +13,7 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC) {
             for (int idx = 0; idx < 3; idx++) { // Look for inputs and flow
                 input_file >> in_string1;
                 if (in_string1 == "[inputs]") { // Input inputs secction
-                    for (int jdx = 0; jdx < 3*7; jdx+=3) { // Less than 3*(num of inputs)
+                    for (int jdx = 0; jdx < 3*8; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
                         (in_string1 == "CFL") ? inputs->CFL = stod(in_string2): false;
                         (in_string1 == "order") ? inputs->order = stoi(in_string2): false;
@@ -22,9 +22,11 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC) {
                         (in_string1 == "monitor_step") ? inputs->monitor_step = stoi(in_string2): false;
                         (in_string1 == "output_step") ? inputs->output_step = stoi(in_string2): false;
                         (in_string1 == "grid_file") ? inputs->grid_file = in_string2: "false";
+                        (in_string1 == "restart") ? inputs->restart = stoi(in_string2): false;
                     }
                     std::cout << "[inputs] \n";
                     std::cout << "  CFL = " << inputs->CFL << std::endl;
+                    std::cout << "  restart = " << inputs->restart << std::endl;
                     std::cout << "  order = " << inputs->order << std::endl;
                     std::cout << "  islimiteron = " << inputs->islimiteron << std::endl;
                     std::cout << "  nmax = " << inputs->nmax << std::endl;

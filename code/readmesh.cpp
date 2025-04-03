@@ -123,9 +123,14 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
 
   double meanx, meany, temp[12], temp1x, temp2x, temp1y, temp2y;
   double center_x, center_y;
+  std::vector<double> save_cell_pointsx, save_cell_pointsy;
+  save_cell_pointsx.assign(num_cells*6,-101);
+  save_cell_pointsy.assign(num_cells*6,-101);
+  std::vector<double> cell_pointsx, cell_pointsy;
   for (int idx = 0; idx < num_cells; idx++) {
     int vertex_count = mesh->cell_face_count[idx], found_count = 0;
-    double cell_pointsx[vertex_count] = {0}, cell_pointsy[vertex_count] = {0};
+    cell_pointsx.assign(vertex_count, 0);
+    cell_pointsy.assign(vertex_count, 0);
     // Find points for each cell and makes sures there are no duplicates 
     for (int jdx = 0; jdx < 6; jdx ++) { // Split cell up
       bool foundtemp1 = false, foundtemp2 = false;
@@ -165,6 +170,8 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     // Get mean center of cell 
     double sum_centerx = 0, sum_centery = 0;
     for (int jdx = 0; jdx < vertex_count; jdx++){
+      save_cell_pointsx[idx*6+jdx] = cell_pointsx[jdx];
+      save_cell_pointsy[idx*6+jdx] = cell_pointsy[jdx];
       sum_centerx += cell_pointsx[jdx];
       sum_centery += cell_pointsy[jdx];
     }
@@ -196,11 +203,26 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       sum_centroidy += cent_sub_y[jdx]* vol_cell_splits[jdx];
     }
     // Find volume of the cell
-    mesh->cell_vol.push_back(sum_vol);
+    // mesh->cell_vol.push_back(sum_vol);
 
     // Find the centroid of entire cell
     mesh->cell_centerx.push_back(sum_centroidx/sum_vol);
     mesh->cell_centery.push_back(sum_centroidy/sum_vol);
+  }
+
+  // Find the volume of the cells
+  int c1, c2;
+  double temp_vol = 0;
+  mesh->cell_vol.assign(num_cells,0);
+  for (int idx = 0; idx < num_faces; idx ++) {
+    c1 = mesh->face_cell1[idx];
+    c2 = mesh->face_cell2[idx];
+
+    temp_vol = (mesh->face_centerx[idx]*mesh->face_nx[idx] + mesh->face_centery[idx]*mesh->face_ny[idx]) * mesh->face_area[idx]*0.5;
+    mesh->cell_vol[c1] += temp_vol;
+    if (c2 >= 0) {
+    mesh->cell_vol[c2] -= temp_vol;
+    }
   }
 
   // // Find the rx and ry vectors
@@ -325,8 +347,12 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   std::ofstream output;
   output.open ("../mesh/cell_data.dat");
   if (output.is_open()) {
+    output << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
     for (int idx = 0; idx < size->num_cells; idx++) {
-      output << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << std::endl;    }
+      output << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << " ";   
+      output << save_cell_pointsx[idx*6] << " " << save_cell_pointsx[idx*6+1] << " " << save_cell_pointsx[idx*6+2] << " " << save_cell_pointsx[idx*6+3] << " " << save_cell_pointsx[idx*6+4] << " " << save_cell_pointsx[idx*6+5] << " ";
+      output << save_cell_pointsy[idx*6] << " " << save_cell_pointsy[idx*6+1] << " " << save_cell_pointsy[idx*6+2] << " " << save_cell_pointsy[idx*6+3] << " " << save_cell_pointsy[idx*6+4] << " " << save_cell_pointsy[idx*6+5] << std::endl;
+    }
   } else {
     std::cout << "ERROR: Cannot Save File \n";
   }

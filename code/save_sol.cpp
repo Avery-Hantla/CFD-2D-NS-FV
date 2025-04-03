@@ -6,11 +6,11 @@
 #include <filesystem> 
 
 #include "class_q.hpp"
-#include "struct_residual.hpp"
+#include "class_residual.hpp"
 #include "struct_inputs.hpp"
 #include "struct_size.hpp"
 
-void save(class_Q* Qbar, struct_residual* residual, struct_inputs* inputs, struct_size* size, int ndx) {
+void save(class_Q* Qbar, class_residual* residual, struct_inputs* inputs, struct_size* size, int ndx) {
     // Monitor 
     if ((ndx % inputs->monitor_step) == 0) {
         std::string iter = std::to_string(ndx);
