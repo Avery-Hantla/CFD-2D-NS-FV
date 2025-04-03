@@ -1,19 +1,36 @@
 [inputs]
-    CFL = 0.04
-    order = 1
-    islimiteron = true
     nmax = 10000
     monitor_step = 50
     output_step = 1000
-    grid_file = ../grid_file.in
+    solution_order = 1
+    islimiteron = true
     restart = 1
+
+[grid]
+    grid_file = ../grid_file.in 
+
+[equations]
+    eqn = EULER
+    flux_solver = RUSANOV
 
 [flow]
     gamma = 1.4
     P = 1
     rho = 1.4
     u = 0.5
-    v = -0.1
+    v = 0
+
+[time]
+    time_scheme = SSP_RK3
+    CFL = 1
+
+[report]
+    u = 0.5
+    v = 0
+    P = 1 
+    rho = 1.4 
+    area = 1
+    length = 1 
 
 [BC]
     BC1 = SLIP_WALL
