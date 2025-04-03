@@ -17,27 +17,38 @@
 void ssp_rk2(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, struct_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC) {
     // Initilize Variables
     class_Q Q_star;
-    Q_star.init(size->num_cells);
+    Q_star.init(size->num_cells, freestream->gamma);
 
     // Compute Time Step
-    double dt;
-    dt = 0.001;
+    int c1, c2;
+    double dt[size->num_cells] = {0}, temp;
+    for (int idx = 0; idx < size->num_faces; idx ++) {
+        c1 = mesh->face_cell1[idx];
+        c2 = mesh->face_cell2[idx];
+
+        dt[c1] += (2*inputs->CFL*mesh->cell_vol[c1])/((std::abs(Qface_c1->Vn_avg[idx])+Qface_c1->c_avg[idx])*mesh->face_area[idx]);
+        if (c2 >= 0){
+            dt[c2] += (2*inputs->CFL*mesh->cell_vol[c2])/((std::abs(Qface_c2->Vn_avg[idx])+Qface_c2->c_avg[idx])*mesh->face_area[idx]);
+        }
+    }
 
     // Calcualte Q star
     res(residual, mesh, size, inputs, Qbar, Qface_c1, Qface_c2, freestream, BC);
     for (int idx = 0; idx < size->num_cells; idx ++) {
-        Q_star.p1[idx] = Qbar->p1[idx] + dt*residual->p1[idx];
-        Q_star.p2[idx] = Qbar->p2[idx] + dt*residual->p2[idx];
-        Q_star.p3[idx] = Qbar->p3[idx] + dt*residual->p3[idx];
-        Q_star.p4[idx] = Qbar->p4[idx] + dt*residual->p4[idx];
+        Q_star.p1[idx] = Qbar->p1[idx] + dt[idx]*residual->p1[idx];
+        Q_star.p2[idx] = Qbar->p2[idx] + dt[idx]*residual->p2[idx];
+        Q_star.p3[idx] = Qbar->p3[idx] + dt[idx]*residual->p3[idx];
+        Q_star.p4[idx] = Qbar->p4[idx] + dt[idx]*residual->p4[idx];
     }
+    Q_star.updateflow();
 
     // Calcualte Q n+1
     res(residual, mesh, size, inputs, &Q_star, Qface_c1, Qface_c2, freestream, BC);
     for (int idx = 0; idx < size->num_cells; idx ++) {
-        Qbar->p1[idx] = Qbar->p1[idx] + Q_star.p1[idx] + dt*residual->p1[idx];
-        Qbar->p2[idx] = Qbar->p2[idx] + Q_star.p2[idx] + dt*residual->p2[idx];
-        Qbar->p3[idx] = Qbar->p3[idx] + Q_star.p3[idx] + dt*residual->p3[idx];
-        Qbar->p4[idx] = Qbar->p4[idx] + Q_star.p4[idx] + dt*residual->p4[idx];
+        Qbar->p1[idx] = 0.5*(Qbar->p1[idx] + Q_star.p1[idx] + dt[idx]*residual->p1[idx]);
+        Qbar->p2[idx] = 0.5*(Qbar->p2[idx] + Q_star.p2[idx] + dt[idx]*residual->p2[idx]);
+        Qbar->p3[idx] = 0.5*(Qbar->p3[idx] + Q_star.p3[idx] + dt[idx]*residual->p3[idx]);
+        Qbar->p4[idx] = 0.5*(Qbar->p4[idx] + Q_star.p4[idx] + dt[idx]*residual->p4[idx]);
     }
+    Qbar->updateflow();
 }
