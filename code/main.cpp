@@ -14,10 +14,13 @@
 #include "struct_BC.hpp"
 #include "struct_size.hpp"
 #include "struct_inputs.hpp"
+#include "struct_time.hpp"
+#include "struct_report.hpp"
 
 // Load Functions 
 #include "read_inputs.cpp"
 #include "readmesh.cpp"
+// #include "ssp_rk2.cpp"
 #include "ssp_rk3.cpp"
 #include "save_sol.cpp"
 
@@ -33,9 +36,11 @@ int main() {
     struct_size size;
     struct_inputs inputs; 
     struct_BC BC;
+    struct_time time;
+    struct_report report;
     
     ////////// Load Variables, Read Mesh, Set up Outputs ///////////
-    read_inputs(&freestream, &inputs, &BC); // Load Input variables
+    read_inputs(&freestream, &inputs, &BC, &time, &report); // Load Input variables
     readmesh(&mesh,inputs.grid_file,&size, &BC); // Import Mesh
 
     std::ofstream output;
@@ -62,7 +67,12 @@ int main() {
 
     //////////////////////// Run Simulation ////////////////////////
     for (int ndx = 1; ndx <= inputs.nmax; ndx++) {
-        ssp_rk3(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC);
+        switch (time.scheme) {
+            case 1:
+                // ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC, &time);
+            case 2:
+                ssp_rk3(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC, &time);
+        }
 
         // Monitor and Output Solution
         save(&Qbar, &residual, &inputs, &size, ndx);
