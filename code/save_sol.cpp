@@ -13,11 +13,21 @@
 void save(class_Q* Qbar, class_residual* residual, struct_inputs* inputs, struct_size* size, int ndx) {
     // Monitor 
     if ((ndx % inputs->monitor_step) == 0) {
+        std::stringstream stream1, stream2, stream3, stream4;
         std::string iter = std::to_string(ndx);
-        std::string res1 = std::to_string(*std::max_element(residual->p1.begin(),residual->p1.end()));
-        std::string res2 = std::to_string(*std::max_element(residual->p2.begin(),residual->p2.end()));
-        std::string res3 = std::to_string(*std::max_element(residual->p3.begin(),residual->p3.end()));
-        std::string res4 = std::to_string(*std::max_element(residual->p4.begin(),residual->p4.end()));
+        stream1 << std::fixed << std::setprecision(12) << *std::max_element(residual->p1.begin(),residual->p1.end());
+        std::string res1 = stream1.str();
+        stream2 << std::fixed << std::setprecision(12) << *std::max_element(residual->p2.begin(),residual->p2.end());
+        std::string res2 = stream2.str();
+        stream3 << std::fixed << std::setprecision(12) << *std::max_element(residual->p3.begin(),residual->p3.end());
+        std::string res3 = stream3.str();
+        stream4 << std::fixed << std::setprecision(12) << *std::max_element(residual->p4.begin(),residual->p4.end());
+        std::string res4 = stream4.str();
+
+        // std::string res1 = std::to_string(*std::max_element(residual->p1.begin(),residual->p1.end()));
+        // std::string res2 = std::to_string(*std::max_element(residual->p2.begin(),residual->p2.end()));
+        // std::string res3 = std::to_string(*std::max_element(residual->p3.begin(),residual->p3.end()));
+        // std::string res4 = std::to_string(*std::max_element(residual->p4.begin(),residual->p4.end()));
 
         // Print to terminal
         std::cout << "iter: " << iter << " res: " << res1 << ", " + res2 << ", " << res3 << ", " << res4 << std::endl;
