@@ -1,19 +1,20 @@
 [inputs]
-    CFL = 0.75
+    CFL = 0.04
     order = 1
     islimiteron = true
-    nmax = 20
-    monitor_step = 2
-    output_step = 20
+    nmax = 10000
+    monitor_step = 50
+    output_step = 1000
     grid_file = ../grid_file.in
+    restart = 1
 
 [flow]
     gamma = 1.4
     P = 1
-    rho = 2
-    u = 3
-    v = 4
+    rho = 1.4
+    u = 0.5
+    v = -0.1
 
 [BC]
     BC1 = SLIP_WALL
-  
+    BC2 = FREESTREAM
