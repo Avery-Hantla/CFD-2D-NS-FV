@@ -11,10 +11,11 @@
 #include "struct_size.hpp"
 #include "struct_inputs.hpp"
 #include "struct_BC.hpp"
+#include "struct_time.hpp"
 
 #include "res.cpp"
 
-void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC) {
+void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC, struct_time* time) {
     // Initilize Variables
     class_Q Q_star;
     Q_star.init(size->num_cells, freestream->gamma);
@@ -34,7 +35,7 @@ void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_
         }
     }
     for (int idx = 0; idx < size->num_cells; idx ++) {
-        dt[idx] = (2*inputs->CFL*mesh->cell_vol[idx])/dt[idx];
+        dt[idx] = (2*time->CFL*mesh->cell_vol[idx])/dt[idx];
     }
 
     // Calcualte Q star 1
