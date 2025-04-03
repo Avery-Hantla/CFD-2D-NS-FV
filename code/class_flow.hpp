@@ -7,6 +7,7 @@
       double rho;
       double u;
       double v;
+      double E;
 
       double Q1;
       double Q2;
@@ -17,7 +18,8 @@
         Q1 = rho;
         Q2 = rho*u;
         Q3 = rho*v;
-        Q4 = (P/(gamma-1)) + 0.5*rho*(u*u+v*v);
+        E = (P/(gamma-1)) + 0.5*rho*(u*u+v*v);
+        Q4 = E;
       }
   };
 #endif

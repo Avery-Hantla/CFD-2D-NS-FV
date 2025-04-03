@@ -28,7 +28,7 @@
             }
 
             void update(class_mesh* mesh, class_Q* Qface, struct_size* size) { // update ALL
-                for (int idx; idx < p1.size(); idx++) {
+                for (int idx = 0; idx < p1.size(); idx++) {
                     Vn[idx] = Qface->u[idx] * mesh->face_nx[idx] + Qface->v[idx] * mesh->face_ny[idx];
 
                     p1[idx] = Qface->rho[idx]*Vn[idx];
@@ -37,5 +37,7 @@
                     p4[idx] = Vn[idx]*(Qface->E[idx] + Qface->P[idx]);
                 }
             }
+
+            
     };
 #endif
