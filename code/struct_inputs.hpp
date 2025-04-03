@@ -8,6 +8,7 @@
         int nmax; 
         int monitor_step;
         int output_step;
+        int restart;
         std::string grid_file; 
     };
 #endif
