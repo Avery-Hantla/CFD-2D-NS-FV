@@ -18,7 +18,7 @@
 // Load Functions 
 #include "read_inputs.cpp"
 #include "readmesh.cpp"
-#include "ssp_rk2.cpp"
+#include "ssp_rk3.cpp"
 #include "save_sol.cpp"
 
 int main() { 
@@ -27,8 +27,8 @@ int main() {
     class_Q Qbar;
     class_Q Qface_c1;
     class_Q Qface_c2;
-    class_F Fface;
     class_flow freestream;
+    class_residual residual;
 
     struct_size size;
     struct_inputs inputs; 
@@ -45,22 +45,24 @@ int main() {
     }
 
     ////////////////////// Initilize Domain ////////////////////////
-    Qbar.init(size.num_cells, &freestream);
-    Qbar.updateQ();
-    Qface_c1.init(size.num_cells*6);
-    Qface_c2.init(size.num_cells*6);
+    if (inputs.restart == 1) {
+        Qbar.init(size.num_cells, &freestream);
+        Qface_c1.init(size.num_faces, &freestream);
+        Qface_c2.init(size.num_faces, &freestream);
+    } else {
+        Qbar.init(size.num_cells, &freestream);
+        Qface_c1.init(size.num_faces, &freestream);
+        Qface_c2.init(size.num_faces, &freestream);
+    }
 
+    Qbar.updateQ();
     freestream.updateQ();
 
-    struct_residual residual;
-    residual.p1.assign(size.num_cells, -101);
-    residual.p2.assign(size.num_cells, -101);
-    residual.p3.assign(size.num_cells, -101);
-    residual.p4.assign(size.num_cells, -101);
+    residual.init(size.num_cells);
 
     //////////////////////// Run Simulation ////////////////////////
     for (int ndx = 1; ndx <= inputs.nmax; ndx++) {
-        ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC);
+        ssp_rk3(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC);
 
         // Monitor and Output Solution
         save(&Qbar, &residual, &inputs, &size, ndx);
