@@ -5,9 +5,6 @@
     #include "class_flow.hpp"
 
     class class_Q {
-        private:
-            double gamma;
-
         public:
             std::vector<double>p1; 
             std::vector<double>p2;
@@ -21,12 +18,21 @@
             std::vector<double>P;
             std::vector<double>c;  
 
+            // Vn avg for entire face!! Only used for q face
+            std::vector<double>Vn_avg;
+            std::vector<double>c_avg;
+
+            double gamma;
+
             void init(int size, class_flow* flow) {
                 gamma = flow->gamma;
                 P.assign(size,flow->P);
                 rho.assign(size,flow->rho);
                 u.assign(size,flow->u);
                 v.assign(size,flow->v);
+
+                Vn_avg.assign(size,std::sqrt(flow->v*flow->v+flow->u*flow->u));
+                c_avg.assign(size,std::sqrt(gamma*(flow->P/flow->rho)));
 
                 E.assign(size,-101);
                 c.assign(size,-101);
@@ -41,8 +47,8 @@
                 p4.assign(size,-101);
             }       
 
-            void init(int size) {
-                gamma = -101;
+            void init(int size, double gamma_in) {
+                gamma = gamma_in;
                 P.assign(size,-101);
                 rho.assign(size,-101);
                 u.assign(size,-101);
@@ -54,26 +60,30 @@
                 p2.assign(size,-101);
                 p3.assign(size,-101);
                 p4.assign(size,-101);
+
+                Vn_avg.assign(size,-101);
+                c_avg.assign(size,-101);
             }   
 
             void updateflow() {
                 rho = p1;
                 E = p4;
-                for (int idx; idx < p1.size(); idx++) {
+                for (int idx = 0; idx < p1.size(); idx++) {
                     u[idx] = p2[idx]/rho[idx];
                     v[idx] = p3[idx]/rho[idx];
-                    P[idx] = (E[idx]-0.5*rho[idx]*(u[idx]+v[idx]))*(gamma-1);
+                    P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(gamma-1);
                     c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
                 }
             }
 
             void updateQ() {
                 p1 = rho;
-                p4 = E;
-                for (int idx; idx < p1.size(); idx++) {
+                for (int idx = 0; idx < p1.size(); idx++) {
                     p2[idx] = rho[idx]*u[idx];
                     p3[idx] = rho[idx]*v[idx];
+                    E[idx] = (P[idx]/(gamma-1)) + 0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx]);
                 }
+                p4 = E;
             }
 
             int findQf(int cell_num, int face_num) { // Used to find Qi face (NOT CELL Q)
