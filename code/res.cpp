@@ -14,6 +14,7 @@
 
 #include "reconstruction.cpp"
 #include "rusanov.cpp"
+#include "roe_flux.cpp"
 
 void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC) {
     class_F F_reimann;
@@ -21,8 +22,15 @@ void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_i
 
     // Reconstuct Cell Faces
     reconstruction(mesh, Qbar, Qface_c1, Qface_c2, freestream, size, inputs, BC);
+
     // Find Reimann Flux
-    rusanov(&F_reimann, Qface_c1, Qface_c2, mesh, freestream, size, BC); 
+    switch (inputs->flux_solver) {
+        case 1:
+            rusanov(&F_reimann, Qface_c1, Qface_c2, mesh, freestream, size, BC); 
+            break;
+        case 2:
+            break;
+    }
 
     // Compute Residual
     int c1_num, c2_num;
