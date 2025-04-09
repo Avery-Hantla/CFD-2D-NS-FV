@@ -11,8 +11,9 @@
 #include "class_mesh.hpp"
 #include "struct_size.hpp"
 #include "struct_BC.hpp"
+#include "struct_inputs.hpp"
 
-void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct_BC* BC) {
+void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct_BC* BC, struct_inputs* inputs) {
   int num_points, num_faces, num_cells;
 
   std::ifstream grid_in;
@@ -20,6 +21,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   if (grid_in.is_open()) {
     double d1, d2;
     int i1, i2;
+    mesh->num_of_BC = 0;
     // Read the number of points, faces, and cell
     grid_in >> num_points >> num_faces >> num_cells;
     std::cout << "Reading " << grid_file << std::endl;
@@ -30,6 +32,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     // Assign vectors size
     mesh->cell_faces.assign (6*num_cells,-101);
     mesh->cell_face_count.assign (num_cells,0);
+    mesh->face2BCf.assign(num_faces, -101);
 
     // Read Points
     for (int idx = 0; idx < num_points; idx++) {
@@ -43,6 +46,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       grid_in >> i1 >> i2; 
       mesh->face_point1.push_back(i1-1);
       mesh->face_point2.push_back(i2-1);
+
     }
 
     // Read Cells 
@@ -65,6 +69,12 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       }
       // Count number of faces in each cell 
       mesh->cell_face_count[(i1-1)] = mesh->cell_face_count[(i1-1)]+=1;
+
+      if (i2-1 < 0) {
+        mesh->BC_faces.push_back(idx);
+        mesh->face2BCf[idx] = mesh->num_of_BC;
+        mesh->num_of_BC ++;
+      }
     }
 
     // Count of many of each element is in the mesh
@@ -203,143 +213,187 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       sum_centroidy += cent_sub_y[jdx]* vol_cell_splits[jdx];
     }
     // Find volume of the cell
-    // mesh->cell_vol.push_back(sum_vol);
+    mesh->cell_vol.push_back(sum_vol);
 
     // Find the centroid of entire cell
     mesh->cell_centerx.push_back(sum_centroidx/sum_vol);
     mesh->cell_centery.push_back(sum_centroidy/sum_vol);
   }
 
-  // Find the volume of the cells
-  int c1, c2;
-  double temp_vol = 0;
-  mesh->cell_vol.assign(num_cells,0);
-  for (int idx = 0; idx < num_faces; idx ++) {
-    c1 = mesh->face_cell1[idx];
-    c2 = mesh->face_cell2[idx];
+  // // Find the volume of the cells
+  // int c1, c2;
+  // double temp_vol = 0;
+  // mesh->cell_vol.assign(num_cells,0);
+  // for (int idx = 0; idx < num_faces; idx ++) {
+  //   c1 = mesh->face_cell1[idx];
+  //   c2 = mesh->face_cell2[idx];
 
-    temp_vol = (mesh->face_centerx[idx]*mesh->face_nx[idx] + mesh->face_centery[idx]*mesh->face_ny[idx]) * mesh->face_area[idx]*0.5;
-    mesh->cell_vol[c1] += temp_vol;
-    if (c2 >= 0) {
-    mesh->cell_vol[c2] -= temp_vol;
-    }
-  }
+  //   temp_vol = (mesh->face_centerx[idx]*mesh->face_nx[idx] + mesh->face_centery[idx]*mesh->face_ny[idx]) * mesh->face_area[idx]*0.5;
+  //   mesh->cell_vol[c1] += temp_vol;
+  //   if (c2 >= 0) {
+  //   mesh->cell_vol[c2] -= temp_vol;
+  //   }
+  // }
 
   // // Find the rx and ry vectors
-  // double mag_temp, dot_temp, cell1, cell2;
-  // mesh->init(num_faces);
-  // for (int idx = 0; idx < num_faces; idx++) {
-  //     // Cell 1
-  //     cell1 = mesh->face_cell1[idx];
-
-  //     mesh->face_cell1_rx[idx] = mesh->face_centerx[idx]-mesh->cell_centerx[cell1];
-  //     mesh->face_cell1_ry[idx] = mesh->face_centery[idx]-mesh->cell_centery[cell1];
-
-  //     mag_temp = std::sqrt(mesh->face_cell1_rx[idx] * mesh->face_cell1_rx[idx] + mesh->face_cell1_ry[idx] * mesh->face_cell1_ry[idx]);
-  //     mesh->face_cell1_rx_norm[idx] = (mesh->face_cell1_rx[idx])/mag_temp; 
-  //     mesh->face_cell1_ry_norm[idx] = (mesh->face_cell1_ry[idx])/mag_temp;
-    
-  //     dot_temp = (mesh->face_cell1_rx_norm[idx] * mesh->face_centerx[cell1] + mesh->face_cell1_ry_norm[idx] * mesh->face_centery[cell1]);
-
-  //     // Check if normal vector goes in or out of cell
-  //     if (dot_temp > 0) { // Out of face
-  //       mesh->face_cell1_n_out[idx] = 1;
-  //     } else if (dot_temp < 0) { // Into cell
-  //       mesh->face_cell1_n_out[idx] = -1;
-  //     } else {
-  //       std::cout << "Error: Norm Doesnt Add Up, Cell 1: readmesh.cpp\n";
-  //     }
-
-  //     // Cell 2
-  //     cell2 = mesh->face_cell2[idx];
-
-  //     if ((cell2 == BC->freestream_patch) || (cell2 == BC->wall_patch)) {
-  //       continue;
-  //     }
-
-  //     mesh->face_cell2_rx[idx] = mesh->face_centerx[idx]-mesh->cell_centerx[cell2];
-  //     mesh->face_cell2_ry[idx] = mesh->face_centery[idx]-mesh->cell_centery[cell2];
-
-  //     mag_temp = std::sqrt(mesh->face_cell2_rx[idx] * mesh->face_cell2_rx[idx] + mesh->face_cell2_ry[idx] * mesh->face_cell2_ry[idx]);
-  //     mesh->face_cell2_rx_norm[idx] = (mesh->face_cell2_rx[idx])/mag_temp; 
-  //     mesh->face_cell2_ry_norm[idx] = (mesh->face_cell2_ry[idx])/mag_temp;
-    
-  //     dot_temp = (mesh->face_cell2_rx_norm[idx] * mesh->face_centerx[cell1] + mesh->face_cell2_ry_norm[idx] * mesh->face_centery[cell1]);
-
-  //     // Check if normal vector goes in or out of cell
-  //     if (dot_temp > 0) { // Out of face
-  //       mesh->face_cell2_n_out[idx] = 1;
-  //     } else if (dot_temp < 0) { // Into cell
-  //       mesh->face_cell2_n_out[idx] = -1;
-  //     } else {
-  //       std::cout << "Error: Norm Doesnt Add Up, Cell 2: readmesh.cpp\n";
-  //     }
-  // }
-
-  // Find the rx and ry vectors
-  int face_num;
-  double mag_temp, dot_temp;
-  mesh->cell_face_rx.assign(num_cells*6,-101);
-  mesh->cell_face_ry.assign(num_cells*6,-101);
-  mesh->cell_face_rx_norm.assign(num_cells*6,-101);
-  mesh->cell_face_ry_norm.assign(num_cells*6,-101);
-  mesh->cell_face_n_out.assign(num_cells*6,-101);
-  for (int idx = 0; idx < num_cells; idx++) {
-    for (int jdx = 0; jdx < mesh->cell_face_count[idx]; jdx++) {
-      if (mesh->cell_face_count[idx] == -101) {
-        break;
-      }
-      face_num = mesh->find_cell_face(idx,jdx);
-
-      mesh->cell_face_rx[6*idx + jdx] = mesh->face_centerx[face_num]-mesh->cell_centerx[idx];
-      mesh->cell_face_ry[6*idx + jdx] = mesh->face_centery[face_num]-mesh->cell_centery[idx];
-      
-      mag_temp = std::sqrt(mesh->cell_face_rx[6*idx + jdx] * mesh->cell_face_rx[6*idx + jdx] + mesh->cell_face_ry[6*idx + jdx] * mesh->cell_face_ry[6*idx + jdx]);
-      mesh->cell_face_rx_norm[6*idx + jdx] = (mesh->cell_face_rx[6*idx + jdx])/mag_temp; 
-      mesh->cell_face_ry_norm[6*idx + jdx] = (mesh->cell_face_ry[6*idx + jdx])/mag_temp;
-    
-      dot_temp = (mesh->cell_face_rx_norm[6*idx + jdx] * mesh->face_nx[face_num] + mesh->cell_face_ry_norm[6*idx + jdx] * mesh->face_ny[face_num]);
-      // Check if normal vector goes in or out of cell
-      if (dot_temp > 0) { // Out of face
-        mesh->cell_face_n_out[6*idx+jdx] = 1;
-      } else if (dot_temp < 0) { // Into cell
-        mesh->cell_face_n_out[6*idx+jdx] = -1;
-      } else {
-        std::cout << "Error: Norm Doesnt Add Up: readmesh.cpp\n";
-      }
-    }
-  }
-
-  // Find the corresponding Qi face num for the face cell 1 and 2
-  // double cell_num;
-  // for (int idx = 0; idx < num_faces; idx ++) {
-  //   cell_num = mesh->face_cells[2*idx]; // Find cell number of cell 1 of face idx
-  //   for (int jdx = 0; jdx < mesh->cell_face_count[cell_num]; jdx ++) { // Search cell for face num
-  //     if (mesh->find_cell_face(cell_num, jdx) == idx ) {
-  //       mesh->face_cell1_Qface_num.push_back(6*cell_num+jdx);
+  // int face_num;
+  // double mag_temp, dot_temp;
+  // mesh->cell_face_rx.assign(num_cells*6,-101);
+  // mesh->cell_face_ry.assign(num_cells*6,-101);
+  // mesh->cell_face_rx_norm.assign(num_cells*6,-101);
+  // mesh->cell_face_ry_norm.assign(num_cells*6,-101);
+  // mesh->cell_face_n_out.assign(num_cells*6,-101);
+  // for (int idx = 0; idx < num_cells; idx++) {
+  //   for (int jdx = 0; jdx < mesh->cell_face_count[idx]; jdx++) {
+  //     if (mesh->cell_face_count[idx] == -101) {
   //       break;
   //     }
-  //   }
+  //     face_num = mesh->find_cell_face(idx,jdx);
 
-  //   cell_num = mesh->face_cells[2*idx+1];
-  //   if (cell_num == -1) {
-  //     mesh->face_cell2_Qface_num.push_back(-1);
-  //   } else if (cell_num == -2) {
-  //     mesh->face_cell2_Qface_num.push_back(-2);
-  //   } else {
-  //     for (int jdx = 0; jdx < mesh->cell_face_count[cell_num]; jdx ++) {
-  //       if (mesh->find_cell_face(cell_num, jdx) == idx ) {
-  //         mesh->face_cell2_Qface_num.push_back(6*cell_num + jdx);
-  //         break; 
-  //       }
+  //     mesh->cell_face_rx[6*idx + jdx] = mesh->face_centerx[face_num]-mesh->cell_centerx[idx];
+  //     mesh->cell_face_ry[6*idx + jdx] = mesh->face_centery[face_num]-mesh->cell_centery[idx];
+      
+  //     mag_temp = std::sqrt(mesh->cell_face_rx[6*idx + jdx] * mesh->cell_face_rx[6*idx + jdx] + mesh->cell_face_ry[6*idx + jdx] * mesh->cell_face_ry[6*idx + jdx]);
+  //     mesh->cell_face_rx_norm[6*idx + jdx] = (mesh->cell_face_rx[6*idx + jdx])/mag_temp; 
+  //     mesh->cell_face_ry_norm[6*idx + jdx] = (mesh->cell_face_ry[6*idx + jdx])/mag_temp;
+    
+  //     dot_temp = (mesh->cell_face_rx_norm[6*idx + jdx] * mesh->face_nx[face_num] + mesh->cell_face_ry_norm[6*idx + jdx] * mesh->face_ny[face_num]);
+  //     // Check if normal vector goes in or out of cell
+  //     if (dot_temp > 0) { // Out of face
+  //       mesh->cell_face_n_out[6*idx+jdx] = 1;
+  //     } else if (dot_temp < 0) { // Into cell
+  //       mesh->cell_face_n_out[6*idx+jdx] = -1;
+  //     } else {
+  //       std::cout << "Error: Norm Doesnt Add Up: readmesh.cpp\n";
   //     }
   //   }
   // }
+
+  // Calculate Variables for 2nd Order FV
+  if (inputs->order == 2) {
+    // Find ghoast cell center 
+    mesh->BC_cell_centerx.assign(mesh->num_of_BC,-101);
+    mesh->BC_cell_centery.assign(mesh->num_of_BC,-101);
+    double norm_temp, rx_temp, ry_temp, face_num;
+    for (int idx = 0; idx < mesh->num_of_BC; idx ++) {
+      face_num = mesh->BC_faces[idx];
+
+      rx_temp = mesh->face_centerx[face_num] - mesh->cell_centerx[mesh->face_cell1[face_num]];
+      ry_temp = mesh->face_centery[face_num] - mesh->cell_centery[mesh->face_cell1[face_num]];
+      norm_temp = 2.0*(rx_temp * mesh->face_nx[face_num] + ry_temp * mesh->face_ny[face_num]);
+
+      mesh->BC_cell_centerx[idx] = mesh->cell_centerx[mesh->face_cell1[face_num]] + norm_temp*mesh->face_nx[face_num];
+      mesh->BC_cell_centery[idx] = mesh->cell_centery[mesh->face_cell1[face_num]] + norm_temp*mesh->face_ny[face_num];
+    }
+
+    // Find distance from face center to cell center
+    mesh->face_cell1_dx.assign(num_faces, -101);
+    mesh->face_cell1_dy.assign(num_faces, -101);
+    mesh->face_cell2_dx.assign(num_faces, -101);
+    mesh->face_cell2_dy.assign(num_faces, -101);
+    int BC_num;
+    for (int idx = 0; idx < num_faces; idx ++) {
+      mesh->face_cell1_dx[idx] = mesh->face_centerx[idx] - mesh->cell_centerx[mesh->face_cell1[idx]];
+      mesh->face_cell1_dy[idx] = mesh->face_centery[idx] - mesh->cell_centery[mesh->face_cell1[idx]];
+
+      if (mesh->face_cell2[idx] >= 0) {
+        mesh->face_cell2_dx[idx] = mesh->face_centerx[idx] - mesh->cell_centerx[mesh->face_cell2[idx]];
+        mesh->face_cell2_dy[idx] = mesh->face_centery[idx] - mesh->cell_centery[mesh->face_cell2[idx]];
+      } else {
+        BC_num = mesh->face2BCf[idx];
+        mesh->face_cell2_dx[idx] = mesh->face_centerx[idx] - mesh->BC_cell_centerx[BC_num];
+        mesh->face_cell2_dy[idx] = mesh->face_centery[idx] - mesh->BC_cell_centery[BC_num];
+      }
+    }
+
+    // Find delta
+    int cell1, cell2;
+    std::vector<double> del_temp1, del_temp2, del_temp3;
+    del_temp1.assign(num_cells,0);
+    del_temp2.assign(num_cells,0);
+    del_temp3.assign(num_cells,0);
+
+    double xi, xj, yi, yj;
+    mesh->delta.assign(num_cells, -101);
+    mesh->face_dxj.assign(num_faces, -101);
+    mesh->face_dyj.assign(num_faces, -101);
+    for (int idx = 0; idx < num_faces; idx ++) {
+      cell1 = mesh->face_cell1[idx];
+      cell2 = mesh->face_cell2[idx];
+
+      xi = mesh->cell_centerx[cell1];
+      yi = mesh->cell_centery[cell1];
+
+      if (cell2 >= 0) {
+        xj = mesh->cell_centerx[cell2];
+        yj = mesh->cell_centery[cell2];
+      } else {
+        BC_num = mesh->face2BCf[idx];
+        xj = mesh->BC_cell_centerx[BC_num];
+        yj = mesh->BC_cell_centery[BC_num];
+      }
+
+      del_temp1[cell1] += (xi - xj)*(xi - xj);
+      del_temp2[cell1] += (yi - yj)*(yi - yj);
+      del_temp3[cell1] += ((xi - xj)*(yi - yj));
+
+      if (cell2 >= 0) {
+        del_temp1[cell2] += (xj - xi)*(xj - xi);
+        del_temp2[cell2] += (yj - yi)*(yj - yi);
+        del_temp3[cell2] += ((xj - xi)*(yj - yi));
+      }
+
+      mesh->face_dxj[idx] = xj-xi;
+      mesh->face_dyj[idx] = yj-yi;
+    }
+
+    for (int idx = 0; idx < num_cells; idx ++) {
+      mesh->delta[idx] = del_temp1[idx]*del_temp2[idx] - (del_temp3[idx]*del_temp3[idx]);
+    }
+
+    // Find Ixx, Iyy, Ixy
+    mesh->Ixx.assign(num_cells, -101);
+    mesh->Iyy.assign(num_cells, -101);
+    mesh->Ixy.assign(num_cells, -101);
+    for (int idx = 0; idx < num_cells; idx ++) {
+      mesh->Ixx[idx] = del_temp1[idx]/mesh->delta[idx];
+      mesh->Iyy[idx] = del_temp2[idx]/mesh->delta[idx];
+      mesh->Ixy[idx] = del_temp3[idx]/mesh->delta[idx];
+    }
+
+    // Cell Centroids
+    std::ofstream temp;
+    temp.open ("../mesh/cell_data_ghost.dat");
+    if (temp.is_open()) {
+      temp << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
+      for (int idx = 0; idx < mesh->num_of_BC; idx++) {
+        temp << mesh->BC_cell_centerx[idx] << " " << mesh->BC_cell_centery[idx] << std::endl;   
+      }
+    } else {
+      std::cout << "ERROR: Cannot Save File \n";
+    }
+    temp.close();
+  }
 
   // Update Size Struct 
   size->num_points = num_points;
   size->num_faces = num_faces;
   size->num_cells = num_cells;
+
+  ////////// Make Conectivity Matrix for Tecplot and CGNS Outputs  //////////
+  // Make conectivity matrix
+  for (int idx = 0; idx < size->num_faces; idx ++) {
+    for (int jdx = 0; jdx < mesh->cell_face_count[idx]; jdx ++) {
+      int face_num = mesh->find_cell_face(idx, jdx);
+
+      int point1 = mesh->face_point1[face_num];
+      int point2 = mesh->face_point2[face_num];
+
+      mesh->connect_out.push_back(point1+1);
+      mesh->connect_out.push_back(point2+1);
+      mesh->connect_out.push_back(size->num_points + idx + 1);
+    }
+  }
 
   /////////////////////// Save metric metrics to file ///////////////////////
 
