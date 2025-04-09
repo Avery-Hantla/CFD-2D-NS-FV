@@ -12,26 +12,41 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
         if (input_file.is_open()) {
             std::cout << "Reading input.in \n";
             std::string in_string1, in_string2, throw_away;
-            for (int idx = 0; idx < 7; idx++) { // Look for inputs and flow
+            for (int idx = 0; idx < 8; idx++) { // Look for inputs and flow
                 input_file >> in_string1;
-                /////////////////////////////////// Inputs ///////////////////////////////////
-                if (in_string1 == "[inputs]") { // Input inputs secction
-                    for (int jdx = 0; jdx < 3*6; jdx+=3) { // Less than 3*(num of inputs)
+                /////////////////////////////////// Case ///////////////////////////////////
+                if (in_string1 == "[case]") { // Input inputs secction
+                    for (int jdx = 0; jdx < 3*5; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
                         (in_string1 == "solution_order") ? inputs->order = stoi(in_string2): false;
-                        (in_string1 == "islimiteron") ? (in_string1 == "true") ? inputs->islimiteron = true: inputs->islimiteron = false : false;
                         (in_string1 == "nmax") ? inputs->nmax = stoi(in_string2): false;
                         (in_string1 == "monitor_step") ? inputs->monitor_step = stoi(in_string2): false;
                         (in_string1 == "output_step") ? inputs->output_step = stoi(in_string2): false;
                         (in_string1 == "restart") ? inputs->restart = stoi(in_string2): false;
                     }
-                    std::cout << "[inputs] \n";
+                    std::cout << "[case] \n";
                     std::cout << "  nmax = " << inputs->nmax << std::endl;
                     std::cout << "  monitor_step = " << inputs->monitor_step << std::endl;
                     std::cout << "  output_step = " << inputs->output_step << std::endl;
                     std::cout << "  solution_order = " << inputs->order << std::endl;
-                    std::cout << "  islimiteron = " << inputs->islimiteron << std::endl;
                     std::cout << "  restart = " << inputs->restart << std::endl;
+                }
+                /////////////////////////////////// Limiter ///////////////////////////////////
+                if (in_string1 == "[limiter]") { // Input inputs secction
+                    std::cout << "[limiter] \n";
+                    for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
+                        if (in_string1 == "limiter_on") {
+                            inputs->islimiteron = stoi(in_string2);
+                            std::cout << "  limiter_on = " << inputs->islimiteron << std::endl;
+                        }
+                        if (in_string1 == "limiter") {
+                            if (in_string2 == "SQUEEZE") {
+                                std::cout << "  limiter = SQUEEZE \n";
+                                inputs->limiter = 1;
+                            }
+                        }
+                    }
                 }
                 /////////////////////////////////// Grid ///////////////////////////////////
                 if (in_string1 == "[grid]") { // Input inputs secction
