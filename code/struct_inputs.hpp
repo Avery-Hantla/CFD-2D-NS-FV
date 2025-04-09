@@ -3,7 +3,6 @@
     #include <iostream>
     struct struct_inputs{
         int order; 
-        bool islimiteron;
         int nmax; 
         int monitor_step;
         int output_step;
@@ -15,5 +14,9 @@
         // Equation
         int eqn;
         int flux_solver;
+
+        // Limiter
+        int islimiteron;
+        int limiter; // 1 is squeeze limiter, 
     };
 #endif
