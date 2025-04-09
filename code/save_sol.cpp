@@ -10,10 +10,47 @@
 #include "class_residual.hpp"
 #include "struct_inputs.hpp"
 #include "struct_size.hpp"
+#include "struct_report.hpp"
 
-void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inputs* inputs, struct_size* size, int ndx) {
+void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inputs* inputs, struct_size* size, struct_report* report, int ndx) {
     // Monitor 
     if ((ndx % inputs->monitor_step) == 0) {
+
+        /////////////////////// Reconstruct to nodes ///////////////////////
+        double face_reconst_p1, face_reconst_p2, face_reconst_p3, face_reconst_p4;
+        double rho, E, u, v, P, force, L = 0, D = 0, CL, CD;
+        for (int idx = 0; idx < size->numWALL; idx++) {
+            int face = mesh->BC_faces[idx];
+            int cell1 = mesh->face_cell1[face];
+
+            int cellx = mesh->cell_centerx[cell1];
+            int celly = mesh->cell_centery[cell1];
+
+            int facex = mesh->face_centerx[face];
+            int facey = mesh->face_centery[face];
+
+            face_reconst_p1 = Qbar->p1[cell1] + ((facex-cellx) * Qbar->Qxp1[cell1] + (facey-celly) * Qbar->Qyp1[cell1]);
+            face_reconst_p2 = Qbar->p2[cell1] + ((facex-cellx) * Qbar->Qxp2[cell1] + (facey-celly) * Qbar->Qyp2[cell1]);
+            face_reconst_p3 = Qbar->p3[cell1] + ((facex-cellx) * Qbar->Qxp3[cell1] + (facey-celly) * Qbar->Qyp3[cell1]);
+            face_reconst_p4 = Qbar->p4[cell1] + ((facex-cellx) * Qbar->Qxp4[cell1] + (facey-celly) * Qbar->Qyp4[cell1]);
+
+            // Find flow parameters
+            rho = face_reconst_p1;
+            E = face_reconst_p2;
+            u = face_reconst_p3/rho;
+            v = face_reconst_p4/rho;
+            P = (E-(0.5*rho*(u*u+v*v)))*(Qbar->gamma-1);
+
+            // Find CL and CD
+            force = P*mesh->face_area[face];
+            L -= force*mesh->face_ny[face];
+            D -= force*mesh->face_nx[face];
+        }
+
+        CL = L/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->area);
+        CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->area);
+
+        //////////////// Output ////////////////
         // std::stringstream stream1, stream2, stream3, stream4;
         std::string iter = std::to_string(ndx);
         // stream1 << std::fixed << std::setprecision(12) << *std::max_element(residual->p1.begin(),residual->p1.end());
@@ -31,11 +68,11 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inpu
         std::string res4 = std::to_string(*std::max_element(residual->p4.begin(),residual->p4.end()));
 
         // Print to terminal
-        std::cout << "iter: " << iter << " res: " << res1 << ", " + res2 << ", " << res3 << ", " << res4 << std::endl;
+        std::cout << "iter: " << iter << ", CL: " << CL << ", CD: " << CD <<", res: " << res1 << ", " + res2 << ", " << res3 << ", " << res4 << std::endl;
 
         // Save to output file
         std::ofstream output("../sol/output.dat", std::ios_base::app | std::ios_base::out);
-        output << iter << " " << res1 << " " + res2 << " " << res3 << " " << res4 << std::endl;
+        output << iter << " " << CL << " " << CD << std::endl;
         output.close();
 
         // Save to residual file
@@ -157,7 +194,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inpu
         output.open ("../sol/mat_sol_" + std::to_string(ndx) + ".dat");
         if (output.is_open()) {
             for (int idx = 0; idx < size->num_cells; idx++) {
-                output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << std::endl;
+                output << Qbar->rho[idx] << " " << Qbar->u[idx] << " " << Qbar->v[idx] << " " << Qbar->P[idx] << std::endl;
             }
         } else {
             std::cout << "ERROR: Cannot Save MATLAB File \n";
@@ -172,7 +209,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inpu
                 output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << std::endl;
             }
         } else {
-            std::cout << "ERROR: Cannot Save MATLAB File \n";
+            std::cout << "ERROR: Cannot Save MATLAB Surface File \n";
         }
         output.close();
     }
