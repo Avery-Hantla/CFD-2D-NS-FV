@@ -13,9 +13,6 @@
 #include "cell_gradient.cpp"
 
 void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qfaces_c1, class_Q* Qfaces_c2, class_flow* freestream, struct_size* size, struct_inputs* inputs, struct_BC* BC) {
-    std::vector<double> sum_temp1x_p1(size->num_faces), sum_temp1x_p2(size->num_faces), sum_temp1x_p3(size->num_faces), sum_temp1x_p4(size->num_faces);
-    std::vector<double> sum_temp1y_p1(size->num_faces), sum_temp1y_p2(size->num_faces), sum_temp1y_p3(size->num_faces), sum_temp1y_p4(size->num_faces);
-
     int cell_1, cell_2;
     double Vn;
     class_flow wall_BC;
@@ -71,19 +68,7 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qfaces_c1, class_Q
             break;
 
         case 2: // Second Order FV Scheme
-            compute_gradient(Qbar, mesh, freestream, size);
-
-            for (int idx = 0; idx < size->num_cells; idx ++) {
-                Qbar->Qxp1[idx] = (sum_temp1x_p1[idx]*mesh->Iyy[idx] - sum_temp1y_p1[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qxp2[idx] = (sum_temp1x_p2[idx]*mesh->Iyy[idx] - sum_temp1y_p2[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qxp3[idx] = (sum_temp1x_p3[idx]*mesh->Iyy[idx] - sum_temp1y_p3[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qxp4[idx] = (sum_temp1x_p4[idx]*mesh->Iyy[idx] - sum_temp1y_p4[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-
-                Qbar->Qyp1[idx] = (sum_temp1y_p1[idx]*mesh->Ixx[idx] - sum_temp1x_p1[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qyp2[idx] = (sum_temp1y_p2[idx]*mesh->Ixx[idx] - sum_temp1x_p2[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qyp3[idx] = (sum_temp1y_p3[idx]*mesh->Ixx[idx] - sum_temp1x_p3[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-                Qbar->Qyp4[idx] = (sum_temp1y_p4[idx]*mesh->Ixx[idx] - sum_temp1x_p4[idx]*mesh->Ixy[idx]);//mesh->delta[idx];
-            }
+            compute_gradient(Qbar, mesh, freestream, size, inputs);
 
             // Reconstruct Faces
             for (int idx = 0; idx < size->num_faces; idx ++) {
@@ -134,6 +119,14 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qfaces_c1, class_Q
                 }
             }
             Qfaces_c2->updateflow();
+
+            // Find Viscous Fluxes for NS
+            switch (inputs->eqn) {
+                case 2: // If eqn == NS
+
+                    break;
+            }
+
             break;
 
         default:
