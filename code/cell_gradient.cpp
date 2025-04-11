@@ -4,14 +4,20 @@
 #include "class_q.hpp"
 #include "class_flow.hpp"
 #include "struct_size.hpp"
+#include "struct_inputs.hpp"
 
-void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, struct_size* size) {
+#include "minmod.cpp"
+
+void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, struct_size* size, struct_inputs* inputs) {
     int cell_1, cell_2;
     double Vn;
     class_flow wall_BC;
     wall_BC.gamma = freestream->gamma;
     std::vector<double> sum_temp1x_p1(size->num_faces), sum_temp1x_p2(size->num_faces), sum_temp1x_p3(size->num_faces), sum_temp1x_p4(size->num_faces);
     std::vector<double> sum_temp1y_p1(size->num_faces), sum_temp1y_p2(size->num_faces), sum_temp1y_p3(size->num_faces), sum_temp1y_p4(size->num_faces);
+
+    std::vector<double> face_slopex_p1(size->num_faces), face_slopex_p2(size->num_faces), face_slopex_p3(size->num_faces), face_slopex_p4(size->num_faces);
+    std::vector<double> face_slopey_p1(size->num_faces), face_slopey_p2(size->num_faces), face_slopey_p3(size->num_faces), face_slopey_p4(size->num_faces);
 
     std::fill(sum_temp1x_p1.begin(), sum_temp1x_p1.end(), 0);
     std::fill(sum_temp1x_p2.begin(), sum_temp1x_p2.end(), 0);
@@ -63,26 +69,41 @@ void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, s
                 break;
         } 
 
-        sum_temp1x_p1[cell_1] += Qjmi_p1*mesh->face_dxj[idx];
-        sum_temp1x_p2[cell_1] += Qjmi_p2*mesh->face_dxj[idx];
-        sum_temp1x_p3[cell_1] += Qjmi_p3*mesh->face_dxj[idx];
-        sum_temp1x_p4[cell_1] += Qjmi_p4*mesh->face_dxj[idx];
+        face_slopex_p1[idx] = Qjmi_p1*mesh->face_dxj[idx];
+        face_slopex_p2[idx] = Qjmi_p2*mesh->face_dxj[idx];
+        face_slopex_p3[idx] = Qjmi_p3*mesh->face_dxj[idx];
+        face_slopex_p4[idx] = Qjmi_p4*mesh->face_dxj[idx];
 
-        sum_temp1y_p1[cell_1] += Qjmi_p1*mesh->face_dyj[idx];
-        sum_temp1y_p2[cell_1] += Qjmi_p2*mesh->face_dyj[idx];
-        sum_temp1y_p3[cell_1] += Qjmi_p3*mesh->face_dyj[idx];
-        sum_temp1y_p4[cell_1] += Qjmi_p4*mesh->face_dyj[idx];
+        face_slopey_p1[idx] = Qjmi_p1*mesh->face_dyj[idx];
+        face_slopey_p2[idx] = Qjmi_p2*mesh->face_dyj[idx];
+        face_slopey_p3[idx] = Qjmi_p3*mesh->face_dyj[idx];
+        face_slopey_p4[idx] = Qjmi_p4*mesh->face_dyj[idx];
+    }
+
+    for (int idx = 0; idx < size->num_faces; idx ++) {
+        cell_1 = mesh->face_cell1[idx];
+        cell_2 = mesh->face_cell2[idx];
+
+        sum_temp1x_p1[cell_1] += face_slopex_p1[idx];
+        sum_temp1x_p2[cell_1] += face_slopex_p2[idx];
+        sum_temp1x_p3[cell_1] += face_slopex_p3[idx];
+        sum_temp1x_p4[cell_1] += face_slopex_p4[idx];
+
+        sum_temp1y_p1[cell_1] += face_slopey_p1[idx];
+        sum_temp1y_p2[cell_1] += face_slopey_p2[idx];
+        sum_temp1y_p3[cell_1] += face_slopey_p3[idx];
+        sum_temp1y_p4[cell_1] += face_slopey_p4[idx];
 
         if (cell_2 >= 0) {
-            sum_temp1x_p1[cell_2] += Qjmi_p1*mesh->face_dxj[idx];
-            sum_temp1x_p2[cell_2] += Qjmi_p2*mesh->face_dxj[idx];
-            sum_temp1x_p3[cell_2] += Qjmi_p3*mesh->face_dxj[idx];
-            sum_temp1x_p4[cell_2] += Qjmi_p4*mesh->face_dxj[idx];
+            sum_temp1x_p1[cell_2] += face_slopex_p1[idx];
+            sum_temp1x_p2[cell_2] += face_slopex_p2[idx];
+            sum_temp1x_p3[cell_2] += face_slopex_p3[idx];
+            sum_temp1x_p4[cell_2] += face_slopex_p4[idx];
 
-            sum_temp1y_p1[cell_2] += Qjmi_p1*mesh->face_dyj[idx];
-            sum_temp1y_p2[cell_2] += Qjmi_p2*mesh->face_dyj[idx];
-            sum_temp1y_p3[cell_2] += Qjmi_p3*mesh->face_dyj[idx];
-            sum_temp1y_p4[cell_2] += Qjmi_p4*mesh->face_dyj[idx];
+            sum_temp1y_p1[cell_2] += face_slopey_p1[idx];
+            sum_temp1y_p2[cell_2] += face_slopey_p2[idx];
+            sum_temp1y_p3[cell_2] += face_slopey_p3[idx];
+            sum_temp1y_p4[cell_2] += face_slopey_p4[idx];
         }
     }
 
