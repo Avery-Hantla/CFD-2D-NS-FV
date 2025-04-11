@@ -1,15 +1,14 @@
-[inputs]
+[case]
     nmax = 10000
     monitor_step = 50
     output_step = 1000
-    solution_order = 1
-    islimiteron = true
-    restart = 1
+    solution_order = 2
+    restart = 0
 
 [grid]
-    grid_file = ../grid_file.in 
+    grid_file = ../grids/grid_file.in 
 
-[equations]
+[equations] 
     eqn = EULER
     flux_solver = RUSANOV
 
@@ -17,15 +16,18 @@
     gamma = 1.4
     P = 1
     rho = 1.4
-    u = 0.5
+    u = 0.85
     v = 0
 
 [time]
     time_scheme = SSP_RK3
     CFL = 1
 
+[limiter]
+    limiter = SQUEEZE
+
 [report]
-    u = 0.5
+    u = 0.85
     v = 0
     P = 1 
     rho = 1.4 
