@@ -15,20 +15,42 @@
 #include "reconstruction.cpp"
 #include "rusanov.cpp"
 #include "roe_flux.cpp"
+#include "squeeze.cpp"
 
 void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC) {
     class_F F_reimann;
     F_reimann.init(size->num_faces, freestream->gamma);
 
     // Reconstuct Cell Faces
-    reconstruction(mesh, Qbar, Qface_c1, Qface_c2, freestream, size, inputs, BC);
+    switch (inputs->order) {
+        case 1:
+            reconstruction(mesh, Qbar, Qface_c1, Qface_c2, freestream, size, inputs, BC);
+            break;
+        case 2:
+            compute_gradient(Qbar, mesh, freestream, size, inputs);
+            reconstruction(mesh, Qbar, Qface_c1, Qface_c2, freestream, size, inputs, BC);
+
+            switch (inputs->limiter) {
+                case 1: // Minmod
+
+                    break;
+                case 2: // Squeeze
+                    squeeze(mesh, Qbar, Qface_c1, Qface_c2, size);
+                    break;
+            }
+
+            break;
+        default: 
+            std::cout << "ERROR: ORDER NOT IMPLEMENTED";
+            break;
+    }
 
     // Find Reimann Flux
     switch (inputs->flux_solver) {
-        case 1:
+        case 1: // Rusanov Flux
             rusanov(&F_reimann, Qface_c1, Qface_c2, mesh, freestream, size, BC); 
             break;
-        case 2:
+        case 2: // Roe Flux
             break;
     }
 
