@@ -16,7 +16,6 @@
         int flux_solver;
 
         // Limiter
-        int islimiteron;
-        int limiter; // 1 is squeeze limiter, 
+        int limiter; // 0 is no limiter, 1 is minmod, 2 is squeeze, 
     };
 #endif
