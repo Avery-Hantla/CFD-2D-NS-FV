@@ -22,6 +22,7 @@ void rusanov(class_F* F_rusanov, class_Q* Qface_c1, class_Q* Qface_c2, class_mes
         double Vn_avg = (F_c1.Vn[idx] + F_c2.Vn[idx])/2;
         double c_avg = (Qface_c1->c[idx] + Qface_c2->c[idx])/2;
 
+        // Save for time step calculation
         Qface_c1->Vn_avg[idx] = Vn_avg;
         Qface_c1->c_avg[idx] = c_avg;
         Qface_c2->Vn_avg[idx] = Vn_avg;
