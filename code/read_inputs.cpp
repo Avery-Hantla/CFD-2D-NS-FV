@@ -34,16 +34,20 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                 /////////////////////////////////// Limiter ///////////////////////////////////
                 if (in_string1 == "[limiter]") { // Input inputs secction
                     std::cout << "[limiter] \n";
-                    for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
+                    for (int jdx = 0; jdx < 3*1; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
-                        if (in_string1 == "limiter_on") {
-                            inputs->islimiteron = stoi(in_string2);
-                            std::cout << "  limiter_on = " << inputs->islimiteron << std::endl;
-                        }
                         if (in_string1 == "limiter") {
+                            if (in_string2 == "NONE") {
+                                std::cout << "  limiter = NONE \n";
+                                inputs->limiter = 0;
+                            }
+                            if (in_string2 == "MINMOD") {
+                                std::cout << "  limiter = MINMOD \n";
+                                inputs->limiter = 1;
+                            }
                             if (in_string2 == "SQUEEZE") {
                                 std::cout << "  limiter = SQUEEZE \n";
-                                inputs->limiter = 1;
+                                inputs->limiter = 2;
                             }
                         }
                     }
@@ -66,6 +70,10 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                             if (in_string2 == "EULER") {
                                 std::cout << "  eqn = EULER \n";
                                 inputs->eqn = 1;
+                            }
+                            if (in_string2 == "NS") {
+                                std::cout << "  eqn = NS \n";
+                                inputs->eqn = 2;
                             }
                         }
                         if (in_string1 == "flux_solver") {
