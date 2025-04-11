@@ -61,12 +61,12 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         std::cout << "iter: " << ndx << ", CL: " << CL << ", CD: " << CD << ", res: " << res1 << ", " << res2 << ", " << res3 << ", " << res4 << std::endl;
 
         // Save to output file
-        std::ofstream output("../sol/output.dat", std::ios_base::app | std::ios_base::out);
+        std::ofstream output("sol/output.dat", std::ios_base::app | std::ios_base::out);
         output << ndx << " " << CL << " " << CD << std::endl;
         output.close();
 
         // Save to residual file
-        std::ofstream res_history("../sol/res_history.dat", std::ios_base::app | std::ios_base::out);
+        std::ofstream res_history("sol/res_history.dat", std::ios_base::app | std::ios_base::out);
         res_history << ndx << " " << res1 << " " << res2 << " " << res3 << " " << res4 << std::endl;
         res_history.close();
     }
@@ -133,7 +133,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         /////////////////////// Save Tecplot Solution  ///////////////////////
         // Save volume data
         std::ofstream output;
-        output.open ("../sol/tec_sol_" + std::to_string(ndx) + ".dat");
+        output.open ("sol/tec_sol_" + std::to_string(ndx) + ".dat");
         if (output.is_open()) {
             // Output Header
             output << "VARIABLES = \"X\", \"Y\", \"density\", \"u\", \"v\", \"P\" \n";
@@ -162,7 +162,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         output.close();
         
         // Save surface data
-        output.open ("../sol/tec_surf_" + std::to_string(ndx) + ".dat");
+        output.open ("sol/tec_surf_" + std::to_string(ndx) + ".dat");
         if (output.is_open()) {
             output << "TITLE     = \"Translation of CGNS file merged_sol_aver.cgns\"" << std::endl;
             output << "VARIABLES = \"CoordinateX\" \n \"CoordinateY\" \n \"rho\" \n \"u\" \n \"v\" \n \"P\" " << std::endl;
@@ -174,14 +174,14 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
                 output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << std::endl;
             }
         } else {
-            std::cout << "ERROR: Cannot Save Tecplot  File \n";
+            std::cout << "ERROR: Cannot Save Tecplot Surface File \n";
         }
         output.close();
 
         /////////////////////// Save MATLAB Solution  ///////////////////////
         // std::ofstream output;
         // Save volume data
-        output.open ("../sol/mat_sol_" + std::to_string(ndx) + ".dat");
+        output.open ("sol/mat_sol_" + std::to_string(ndx) + ".dat");
         if (output.is_open()) {
             for (int idx = 0; idx < size->num_cells; idx++) {
                 output << Qbar->rho[idx] << " " << Qbar->u[idx] << " " << Qbar->v[idx] << " " << Qbar->P[idx] << std::endl;
@@ -192,7 +192,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         output.close();
 
         // Save surface data
-        output.open ("../sol/mat_surf_" + std::to_string(ndx) + ".dat");
+        output.open ("sol/mat_surf_" + std::to_string(ndx) + ".dat");
         if (output.is_open()) {
             for (int idx = 0; idx < size->numWALL+1; idx++) {
                 output << mesh->x[idx] << " " << mesh->y[idx] << " ";

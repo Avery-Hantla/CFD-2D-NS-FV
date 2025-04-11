@@ -6,11 +6,15 @@
 #include "struct_time.hpp"
 #include "struct_report.hpp"
 
-void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, struct_time* time, struct_report* report) {
+void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, struct_time* time, struct_report* report, int argc, char** argv) {
     std::ifstream input_file;
-        input_file.open ("../input.in");
+        if (argc == 2) {
+            input_file.open (argv[1]);
+        } else {
+            input_file.open ("input.in");
+        }
         if (input_file.is_open()) {
-            std::cout << "Reading input.in \n";
+            std::cout << "\nReading input.in \n";
             std::string in_string1, in_string2, throw_away;
             for (int idx = 0; idx < 8; idx++) { // Look for inputs and flow
                 input_file >> in_string1;

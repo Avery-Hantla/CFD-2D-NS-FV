@@ -15,7 +15,7 @@ void post(class_Q* Qbar, class_residual* residual, struct_inputs* inputs, struct
     std::cout <<  "Writing Restart File \n";
 
     std::ofstream restart;
-    restart.open ("../sol/restart_sol.dat");
+    restart.open ("sol/restart_sol.dat");
     if (restart.is_open()) {
         restart << ndx << " " << size->num_cells <<std::endl;
         for (int idx = 0; idx < size->num_cells; idx++) {

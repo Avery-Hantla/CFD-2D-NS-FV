@@ -4,6 +4,7 @@
                          March 2025
 */ //////////////////////////////////////////////////////////
 #include <iostream>
+#include <filesystem>
 // #include <cgnslib.h>
 
 // Load classes, structs, etc.
@@ -27,7 +28,7 @@
 #include "post_process.cpp"
 // #include "writecgns.cpp"
 
-int main() { 
+int main(int argc, char *argv[]) { 
     //////////// Initilize Variables, Objects, Structs /////////////
     class_mesh mesh; 
     class_Q Qbar;
@@ -43,19 +44,30 @@ int main() {
     struct_report report;
     
     ////////// Load Variables, Read Mesh, Set up Outputs ///////////
-    read_inputs(&freestream, &inputs, &BC, &time, &report); // Load Input variables
+    try {
+        std::filesystem::create_directory("sol");
+        std::filesystem::create_directory("mesh");
+    } catch(std::exception & e){
+    }
+
+    read_inputs(&freestream, &inputs, &BC, &time, &report, argc, argv); // Load Input variables
     readmesh(&mesh,inputs.grid_file,&size, &BC, &inputs); // Import Mesh
+
+    // try {
+    //     std::filesystem::create_directory("mesh");
+    // } catch(std::exception & e){
+    // }
 
     if (inputs.restart == 0) {
         std::ofstream res_history;
-        res_history.open ("../sol/res_history.dat");
+        res_history.open ("sol/res_history.dat");
         if (res_history.is_open()) {
             res_history << "#iter, res1, res2, res3, res4" << std::endl;
         }
         res_history.close();
 
         std::ofstream output;
-        output.open ("../sol/output.dat");
+        output.open ("/sol/output.dat");
         if (output.is_open()) {
             output << "#iter, CL, CD" << std::endl;
         }
@@ -66,7 +78,7 @@ int main() {
     int ndx;
     if (inputs.restart == 1) {
         std::ifstream restart;
-        restart.open ("../sol/restart_sol.dat");
+        restart.open ("sol/restart_sol.dat");
         if (restart.is_open()) {
             int num_cells_restart;
             double Q1, Q2, Q3, Q4;

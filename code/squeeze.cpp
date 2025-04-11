@@ -130,38 +130,38 @@ void squeeze(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_
         phi_p1[cell1] = std::min({ phi_p1_c1[idx] , phi_p1[cell1] });
         phi_p4[cell1] = std::min({ phi_p4_c1[idx] , phi_p4[cell1] });
 
-        // if ((phi_p1[cell1] || phi_p1[cell1]) == 0) {
-        //     phi_p1[cell1] = 0;
-        //     phi_p2[cell1] = 0;
-        //     phi_p3[cell1] = 0;
-        //     phi_p4[cell1] = 0;
-        // } else if ((phi_p1[cell1] || phi_p1[cell1]) == 1) {
-        //     phi_p1[cell1] = 1;
-        //     phi_p2[cell1] = 1;
-        //     phi_p3[cell1] = 1;
-        //     phi_p4[cell1] = 1;
-        // } else {
+        if ((phi_p1[cell1] || phi_p1[cell1]) == 0) {
+            phi_p1[cell1] = 0;
+            phi_p2[cell1] = 0;
+            phi_p3[cell1] = 0;
+            phi_p4[cell1] = 0;
+        } else if ((phi_p1[cell1] || phi_p1[cell1]) == 1) {
+            phi_p1[cell1] = 1;
+            phi_p2[cell1] = 1;
+            phi_p3[cell1] = 1;
+            phi_p4[cell1] = 1;
+        } else {
             phi_p2[cell1] = std::min({ phi_p2_c1[idx] , phi_p2[cell1] });
             phi_p3[cell1] = std::min({ phi_p3_c1[idx] , phi_p3[cell1] });
-        // }
+        }
 
         if (cell2 >= 0) {
             phi_p1[cell2] = std::min({ phi_p1_c2[idx] , phi_p1[cell2] });
             phi_p4[cell2] = std::min({ phi_p4_c2[idx] , phi_p4[cell2] });
-        //     if ((phi_p1[cell2] || phi_p1[cell2]) == 0) {
-        //         phi_p1[cell2] = 0;
-        //         phi_p2[cell2] = 0;
-        //         phi_p3[cell2] = 0;
-        //         phi_p4[cell2] = 0;
-        //     } else if ((phi_p1[cell2] || phi_p1[cell2]) == 1) {
-        //         phi_p1[cell2] = 1;
-        //         phi_p2[cell2] = 1;
-        //         phi_p3[cell2] = 1;
-        //         phi_p4[cell2] = 1;
-        //     } else {
+            if ((phi_p1[cell2] || phi_p1[cell2]) == 0) {
+                phi_p1[cell2] = 0;
+                phi_p2[cell2] = 0;
+                phi_p3[cell2] = 0;
+                phi_p4[cell2] = 0;
+            } else if ((phi_p1[cell2] || phi_p1[cell2]) == 1) {
+                phi_p1[cell2] = 1;
+                phi_p2[cell2] = 1;
+                phi_p3[cell2] = 1;
+                phi_p4[cell2] = 1;
+            } else {
                 phi_p2[cell2] = std::min({ phi_p2_c2[idx] , phi_p2[cell2] });
                 phi_p3[cell2] = std::min({ phi_p3_c2[idx] , phi_p3[cell2] });
-            // }
+            }
         }
     }
 

@@ -22,6 +22,9 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     double d1, d2;
     int i1, i2;
     mesh->num_of_BC = 0;
+    size->numBC1 = 0;
+    size->numBC2 = 0;
+
     // Read the number of points, faces, and cell
     grid_in >> num_points >> num_faces >> num_cells;
     std::cout << "Reading " << grid_file << std::endl;
@@ -55,15 +58,17 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       mesh->face_cell1.push_back(i1-1);
       if (i2-1 == -1) {
         mesh->face_cell2.push_back(BC->BC1);
+        size->numBC1++;
       } else if (i2-1 == -2) {
         mesh->face_cell2.push_back(BC->BC2);
+        size->numBC2++;
       } else {
         mesh->face_cell2.push_back(i2-1);
       }
 
       // Assign Faces to Cell Array 
       mesh->cell_faces[(i1-1)*6+(mesh->cell_face_count[(i1-1)])] = idx;
-      if ( (i2 != -1) && (i2 != 0) ) {
+      if (i2 > 0) {
         mesh->cell_faces[(i2-1)*6+(mesh->cell_face_count[(i2-1)])] = idx;
         mesh->cell_face_count[(i2-1)] = mesh->cell_face_count[(i2-1)]+=1;
       }
@@ -269,8 +274,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   //   }
   // }
 
-  // Calculate Variables for 2nd Order FV
-  if (inputs->order == 2) {
+  // Calculate Variables for Gradient
     // Find ghoast cell center 
     mesh->BC_cell_centerx.assign(mesh->num_of_BC,-101);
     mesh->BC_cell_centery.assign(mesh->num_of_BC,-101);
@@ -361,19 +365,18 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
       mesh->Ixy[idx] = del_temp3[idx]/mesh->delta[idx];
     }
 
-    // Cell Centroids
-    std::ofstream temp;
-    temp.open ("../mesh/cell_data_ghost.dat");
-    if (temp.is_open()) {
-      temp << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
-      for (int idx = 0; idx < mesh->num_of_BC; idx++) {
-        temp << mesh->BC_cell_centerx[idx] << " " << mesh->BC_cell_centery[idx] << std::endl;   
-      }
-    } else {
-      std::cout << "ERROR: Cannot Save File \n";
-    }
-    temp.close();
-  }
+    // // Cell Centroids
+    // std::ofstream temp_centroids;
+    // temp_centroids.open ("mesh/cell_data_ghost.dat");
+    // if (temp_centroids.is_open()) {
+    //   temp_centroids << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
+    //   for (int idx = 0; idx < mesh->num_of_BC; idx++) {
+    //     temp_centroids << mesh->BC_cell_centerx[idx] << " " << mesh->BC_cell_centery[idx] << std::endl;   
+    //   }
+    // } else {
+    //   std::cout << "ERROR: Cannot Save File \n";
+    // }
+    // temp_centroids.close();
 
   // Update Size Struct 
   size->num_points = num_points;
@@ -382,7 +385,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
 
   ////////// Make Conectivity Matrix for Tecplot and CGNS Outputs  //////////
   // Make conectivity matrix
-  for (int idx = 0; idx < size->num_faces; idx ++) {
+  for (int idx = 0; idx < size->num_cells; idx ++) {
     for (int jdx = 0; jdx < mesh->cell_face_count[idx]; jdx ++) {
       int face_num = mesh->find_cell_face(idx, jdx);
 
@@ -395,11 +398,18 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     }
   }
 
+  // Set number of wall elements
+  if (BC->BC1 == -2) {
+    size->numWALL = size->numBC1;
+  } else if (BC->BC2 == -2) {
+    size->numWALL = size->numBC2;
+  }
+
   /////////////////////// Save metric metrics to file ///////////////////////
 
   // Cell Centroids
   std::ofstream output;
-  output.open ("../mesh/cell_data.dat");
+  output.open ("mesh/cell_data.dat");
   if (output.is_open()) {
     output << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
     for (int idx = 0; idx < size->num_cells; idx++) {
@@ -413,7 +423,7 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   output.close();
 
   // Faces
-  output.open ("../mesh/face_data.dat");
+  output.open ("mesh/face_data.dat");
   if (output.is_open()) {
     output << "# face point 1 x, face point 1 y, face point 2 x, face point 2y, face nx, face ny, face center x, face center y" << std::endl;
     for (int idx = 0; idx < size->num_faces; idx++) {
