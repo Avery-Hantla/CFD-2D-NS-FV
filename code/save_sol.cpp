@@ -8,11 +8,12 @@
 #include "class_mesh.hpp"
 #include "class_q.hpp"
 #include "class_residual.hpp"
+#include "class_f.hpp"
 #include "struct_inputs.hpp"
 #include "struct_size.hpp"
 #include "struct_report.hpp"
 
-void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inputs* inputs, struct_size* size, struct_report* report, int ndx) {
+void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow* freestream, struct_inputs* inputs, struct_size* size, struct_report* report, int ndx) {
     // Monitor 
     if ((ndx % inputs->monitor_step) == 0) {
 
@@ -51,33 +52,22 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, struct_inpu
         CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->area);
 
         //////////////// Output ////////////////
-        // std::stringstream stream1, stream2, stream3, stream4;
-        std::string iter = std::to_string(ndx);
-        // stream1 << std::fixed << std::setprecision(12) << *std::max_element(residual->p1.begin(),residual->p1.end());
-        // std::string res1 = stream1.str();
-        // stream2 << std::fixed << std::setprecision(12) << *std::max_element(residual->p2.begin(),residual->p2.end());
-        // std::string res2 = stream2.str();
-        // stream3 << std::fixed << std::setprecision(12) << *std::max_element(residual->p3.begin(),residual->p3.end());
-        // std::string res3 = stream3.str(); 
-        // stream4 << std::fixed << std::setprecision(12) << *std::max_element(residual->p4.begin(),residual->p4.end());
-        // std::string res4 = stream4.str();
-
-        std::string res1 = std::to_string(*std::max_element(residual->p1.begin(),residual->p1.end()));
-        std::string res2 = std::to_string(*std::max_element(residual->p2.begin(),residual->p2.end()));
-        std::string res3 = std::to_string(*std::max_element(residual->p3.begin(),residual->p3.end()));
-        std::string res4 = std::to_string(*std::max_element(residual->p4.begin(),residual->p4.end()));
+        double res1 = *std::max_element(residual->p1.begin(),residual->p1.end());
+        double res2 = *std::max_element(residual->p2.begin(),residual->p2.end());
+        double res3 = *std::max_element(residual->p3.begin(),residual->p3.end());
+        double res4 = *std::max_element(residual->p4.begin(),residual->p4.end());
 
         // Print to terminal
-        std::cout << "iter: " << iter << ", CL: " << CL << ", CD: " << CD <<", res: " << res1 << ", " + res2 << ", " << res3 << ", " << res4 << std::endl;
+        std::cout << "iter: " << ndx << ", CL: " << CL << ", CD: " << CD << ", res: " << res1 << ", " << res2 << ", " << res3 << ", " << res4 << std::endl;
 
         // Save to output file
         std::ofstream output("../sol/output.dat", std::ios_base::app | std::ios_base::out);
-        output << iter << " " << CL << " " << CD << std::endl;
+        output << ndx << " " << CL << " " << CD << std::endl;
         output.close();
 
         // Save to residual file
         std::ofstream res_history("../sol/res_history.dat", std::ios_base::app | std::ios_base::out);
-        res_history << iter << " " << res1 << " " + res2 << " " << res3 << " " << res4 << std::endl;
+        res_history << ndx << " " << res1 << " " << res2 << " " << res3 << " " << res4 << std::endl;
         res_history.close();
     }
 
