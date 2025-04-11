@@ -54,6 +54,9 @@
       std::vector<double> connect_out;
 
 
+      // NS 
+
+
       int find_cell_face(int cell_num, int cell_face) {
         return cell_faces[cell_num*6 + cell_face];
       }

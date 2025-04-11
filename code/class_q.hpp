@@ -22,6 +22,16 @@
             std::vector<double>Vn_avg;
             std::vector<double>c_avg;
 
+            std::vector<double> Qxp1;
+            std::vector<double> Qxp2;
+            std::vector<double> Qxp3;
+            std::vector<double> Qxp4;
+
+            std::vector<double> Qyp1;
+            std::vector<double> Qyp2;
+            std::vector<double> Qyp3;
+            std::vector<double> Qyp4;
+
             double gamma;
 
             void init(int size, class_flow* flow) {
@@ -45,6 +55,16 @@
                 p2.assign(size,-101);
                 p3.assign(size,-101);
                 p4.assign(size,-101);
+
+                Qxp1.assign(size, 0);
+                Qxp2.assign(size, 0);
+                Qxp3.assign(size, 0);
+                Qxp4.assign(size, 0);
+
+                Qyp1.assign(size, 0);
+                Qyp2.assign(size, 0);
+                Qyp3.assign(size, 0);
+                Qyp4.assign(size, 0);
             }       
 
             void init(int size, double gamma_in) {
@@ -63,6 +83,21 @@
 
                 Vn_avg.assign(size,-101);
                 c_avg.assign(size,-101);
+
+                p1.assign(size,-101);
+                p2.assign(size,-101);
+                p3.assign(size,-101);
+                p4.assign(size,-101);
+
+                Qxp1.assign(size, 0);
+                Qxp2.assign(size, 0);
+                Qxp3.assign(size, 0);
+                Qxp4.assign(size, 0);
+
+                Qyp1.assign(size, 0);
+                Qyp2.assign(size, 0);
+                Qyp3.assign(size, 0);
+                Qyp4.assign(size, 0);
             }   
 
             void updateflow() {
@@ -74,6 +109,15 @@
                     P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(gamma-1);
                     c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
                 }
+            }
+
+            void updateflow_int(int idx) {
+                rho[idx] = p1[idx];
+                E[idx] = p4[idx];
+                u[idx] = p2[idx]/rho[idx];
+                v[idx] = p3[idx]/rho[idx];
+                P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(gamma-1);
+                c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
             }
 
             void updateQ() {
