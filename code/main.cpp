@@ -113,7 +113,7 @@ int main() {
         }
 
         // Monitor and Output Solution
-        save(&Qbar, &mesh, &residual, &inputs, &size, &report, ndx);
+        save(&Qbar, &mesh, &residual, &freestream, &inputs, &size, &report, ndx);
 
         ndx ++;
     }
