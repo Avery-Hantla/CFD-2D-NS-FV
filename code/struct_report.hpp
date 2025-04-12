@@ -4,7 +4,6 @@
     double u;
     double v; 
     double rho;
-    double area;
     double length;
     double P;
   };
