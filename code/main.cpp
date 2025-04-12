@@ -7,7 +7,7 @@
 #include <filesystem>
 // #include <cgnslib.h>
 
-// Load classes, structs, etc.
+// Load classes, structs, etc
 #include "class_mesh.hpp"
 #include "class_q.hpp"
 #include "class_f.hpp"
@@ -53,11 +53,6 @@ int main(int argc, char *argv[]) {
     read_inputs(&freestream, &inputs, &BC, &time, &report, argc, argv); // Load Input variables
     readmesh(&mesh,inputs.grid_file,&size, &BC, &inputs); // Import Mesh
 
-    // try {
-    //     std::filesystem::create_directory("mesh");
-    // } catch(std::exception & e){
-    // }
-
     if (inputs.restart == 0) {
         std::ofstream res_history;
         res_history.open ("sol/res_history.dat");
@@ -76,6 +71,10 @@ int main(int argc, char *argv[]) {
 
     ////////////////////// Initilize Domain ////////////////////////
     int ndx;
+    freestream.update_vis();
+    freestream.updateQ();
+    residual.init(size.num_cells);
+    
     if (inputs.restart == 1) {
         std::ifstream restart;
         restart.open ("sol/restart_sol.dat");
@@ -88,7 +87,7 @@ int main(int argc, char *argv[]) {
                 std::cout << "ERROR: Restart File Does Not Match Grid Input";
             }
 
-            Qbar.init(size.num_cells, freestream.gamma);
+            Qbar.init(size.num_cells, freestream.gamma, freestream.R);
             for (int idx = 0; idx < num_cells_restart; idx ++) {
                 restart >> Q1 >> Q2 >> Q3 >> Q4;
                 Qbar.p1[idx] = Q1;
@@ -111,9 +110,6 @@ int main(int argc, char *argv[]) {
 
         ndx = 1;
     }
-    freestream.updateQ();
-
-    residual.init(size.num_cells);
 
     //////////////////////// Run Simulation ////////////////////////
     while (ndx <= inputs.nmax) {
