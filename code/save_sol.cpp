@@ -48,8 +48,8 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
             D -= force*mesh->face_nx[face];
         }
 
-        CL = L/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->area);
-        CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->area);
+        CL = L/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
+        CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
 
         //////////////// Output ////////////////
         double res1 = *std::max_element(residual->p1.begin(),residual->p1.end());
