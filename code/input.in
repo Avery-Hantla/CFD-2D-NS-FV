@@ -2,18 +2,23 @@
     nmax = 10000
     monitor_step = 50
     output_step = 1000
-    solution_order = 2
+    solution_order = 1
     restart = 0 
 
 [grid]
     grid_file = ../grids/grid_file.in 
 
 [equations] 
-    eqn = EULER
+    eqn = NS
     flux_solver = RUSANOV
 
-[flow]
+[fluid]
     gamma = 1.4
+    R = 287
+    mu = 0.0000178
+    Pr = 0.72
+
+[init]
     P = 1
     rho = 1.4
     u = 0.85
@@ -24,14 +29,9 @@
     CFL = 1
 
 [limiter]
-    limiter = SQUEEZE
+    limiter = NONE
 
 [report]
-    u = 0.85
-    v = 0
-    P = 1 
-    rho = 1.4 
-    area = 1
     length = 1 
 
 [BC]
