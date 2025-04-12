@@ -16,7 +16,7 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
         if (input_file.is_open()) {
             std::cout << "\nReading input.in \n";
             std::string in_string1, in_string2, throw_away;
-            for (int idx = 0; idx < 8; idx++) { // Look for inputs and flow
+            for (int idx = 0; idx < 9; idx++) { // Look for inputs and flow
                 input_file >> in_string1;
                 /////////////////////////////////// Case ///////////////////////////////////
                 if (in_string1 == "[case]") { // Input inputs secction
@@ -92,18 +92,32 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                         }
                     }
                 }
-                /////////////////////////////////// Flow ///////////////////////////////////
-                if (in_string1 == "[flow]") { // flow Flow section
-                    for (int jdx = 0; jdx < 3*5; jdx+=3) { // Less than 3*(num of inputs)
+                /////////////////////////////////// Fluid ///////////////////////////////////
+                if (in_string1 == "[fluid]") { // fluid section
+                    for (int jdx = 0; jdx < 3*4; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
                         (in_string1 == "gamma") ? freestream->gamma = stod(in_string2): false;
+                        (in_string1 == "R") ? freestream->R = stod(in_string2): false;
+                        (in_string1 == "mu") ? freestream->mu = stod(in_string2): false;
+                        (in_string1 == "Pr") ? freestream->Pr = stod(in_string2): false;
+                    }
+                    std::cout << "[fluid] \n";
+                    std::cout << "  gamma = " << freestream->gamma << std::endl;
+                    std::cout << "  R = " << freestream->R << std::endl;
+                    std::cout << "  mu = " << freestream->mu << std::endl;
+                    std::cout << "  Pr = " << freestream->Pr << std::endl;
+                }
+
+                /////////////////////////////////// Init ///////////////////////////////////
+                if (in_string1 == "[init]") { // init section
+                    for (int jdx = 0; jdx < 3*4; jdx+=3) { // Less than 3*(num of inputs)
+                        input_file >> in_string1 >> throw_away >> in_string2;
                         (in_string1 == "P") ? freestream->P = stod(in_string2): false;
                         (in_string1 == "rho") ? freestream->rho = stod(in_string2): false;
                         (in_string1 == "u") ? freestream->u = stod(in_string2): false;
                         (in_string1 == "v") ? freestream->v = stod(in_string2): false;
                     }
-                    std::cout << "[flow] \n";
-                    std::cout << "  gamma = " << freestream->gamma << std::endl;
+                    std::cout << "[init] \n";
                     std::cout << "  P = " << freestream->P << std::endl;
                     std::cout << "  rho = " << freestream->rho << std::endl;
                     std::cout << "  u = " << freestream->u << std::endl;
@@ -131,21 +145,11 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                 }
                 /////////////////////////////////// report ///////////////////////////////////
                 if (in_string1 == "[report]") { // flow Flow section
-                    for (int jdx = 0; jdx < 3*6; jdx+=3) { // Less than 3*(num of inputs)
+                    for (int jdx = 0; jdx < 3*1; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
-                        (in_string1 == "u") ? report->u = stod(in_string2): false;
-                        (in_string1 == "v") ? report->v = stod(in_string2): false;
-                        (in_string1 == "P") ? report->P = stod(in_string2): false;
-                        (in_string1 == "rho") ? report->rho = stod(in_string2): false;
-                        (in_string1 == "area") ? report->area = stod(in_string2): false;
                         (in_string1 == "length") ? report->length = stod(in_string2): false;
                     }
                     std::cout << "[report] \n";
-                    std::cout << "  u = " << report->u << std::endl;
-                    std::cout << "  v = " << report->v << std::endl;
-                    std::cout << "  P = " << report->P << std::endl;
-                    std::cout << "  rho = " << report->rho << std::endl;
-                    std::cout << "  area = " << report->area << std::endl;
                     std::cout << "  length = " << report->length << std::endl;
                 }
                 /////////////////////////////////// BC ///////////////////////////////////
@@ -166,6 +170,10 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                                 std::cout << "  BC1 = EXTRAPOLATION \n";
                                 BC->BC1 = -3;
                             }
+                            if (in_string2 == "NO_SLIP_WALL") {
+                                std::cout << "  BC1 = NO_SLIP_WALL \n";
+                                BC->BC1 = -4;
+                            }
                         }
                         if (in_string1 == "BC2") {
                             if (in_string2 == "FREESTREAM") {
@@ -180,6 +188,10 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                                 std::cout << "  BC2 = EXTRAPOLATION \n";
                                 BC->BC2 = -3;
                             }
+                            if (in_string2 == "NO_SLIP_WALL") {
+                                std::cout << "  BC2 = NO_SLIP_WALL \n";
+                                BC->BC2 = -4;
+                            }
                         }
                     }
                 }
@@ -188,4 +200,9 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
             std::cout << "ERROR: Cannot Open Input File\n";
         }
     input_file.close();
+
+    report->P = freestream->P;
+    report->u = freestream->u;
+    report->v = freestream->v;
+    report->rho = freestream->rho;
 }
