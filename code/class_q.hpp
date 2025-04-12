@@ -6,6 +6,10 @@
 
     class class_Q {
         public:
+            double R;
+            double gamma;
+            double k;
+
             std::vector<double>p1; 
             std::vector<double>p2;
             std::vector<double>p3; 
@@ -17,6 +21,8 @@
             std::vector<double>E;
             std::vector<double>P;
             std::vector<double>c;  
+
+            std::vector<double>T;  
 
             // Vn avg for entire face!! Only used for q face
             std::vector<double>Vn_avg;
@@ -32,23 +38,24 @@
             std::vector<double> Qyp3;
             std::vector<double> Qyp4;
 
-            double gamma;
-
             void init(int size, class_flow* flow) {
                 gamma = flow->gamma;
                 P.assign(size,flow->P);
                 rho.assign(size,flow->rho);
                 u.assign(size,flow->u);
                 v.assign(size,flow->v);
+                R = flow->R;
 
                 Vn_avg.assign(size,std::sqrt(flow->v*flow->v+flow->u*flow->u));
                 c_avg.assign(size,std::sqrt(gamma*(flow->P/flow->rho)));
 
                 E.assign(size,-101);
                 c.assign(size,-101);
+                T.assign(size,-101);
                 for (int idx = 0; idx < size; idx ++) {
                     E[idx] = (P[idx]/(gamma-1)) + 0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx]);
                     c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
+                    T[idx] = P[idx]/(rho[idx]*R);
                 }
                 
                 p1.assign(size,-101);
@@ -67,14 +74,16 @@
                 Qyp4.assign(size, 0);
             }       
 
-            void init(int size, double gamma_in) {
+            void init(int size, double gamma_in, double R_in) {
                 gamma = gamma_in;
+                R = R_in;
                 P.assign(size,-101);
                 rho.assign(size,-101);
                 u.assign(size,-101);
                 v.assign(size,-101);
                 E.assign(size,-101);
                 c.assign(size,-101);
+                T.assign(size,-101);
 
                 p1.assign(size,-101);
                 p2.assign(size,-101);
@@ -108,6 +117,7 @@
                     v[idx] = p3[idx]/rho[idx];
                     P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(gamma-1);
                     c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
+                    T[idx] = P[idx]/(rho[idx]*R);
                 }
             }
 
@@ -118,6 +128,7 @@
                 v[idx] = p3[idx]/rho[idx];
                 P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(gamma-1);
                 c[idx] = std::sqrt(gamma*(P[idx]/rho[idx]));
+                T[idx] = P[idx]/(rho[idx]*R); 
             }
 
             void updateQ() {
