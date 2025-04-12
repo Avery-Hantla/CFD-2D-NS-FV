@@ -18,7 +18,7 @@
 void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC, struct_time* time) {
     // Initilize Variables
     class_Q Q_star;
-    Q_star.init(size->num_cells, freestream->gamma);
+    Q_star.init(size->num_cells, freestream->gamma, freestream->R);
 
     // Compute Time Step
     int c1, c2;
