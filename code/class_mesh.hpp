@@ -53,9 +53,14 @@
       // Conectivity Matrix for Tecplot and CGNS Outputs
       std::vector<double> connect_out;
 
-
       // NS 
+      std::vector<double> face_mx; //f1mx, f2mx, ...
+      std::vector<double> face_my; //f1my, f2my, ...
 
+      std::vector<double> face_lx; //f1lx, f2lx, ...
+      std::vector<double> face_ly; //f1ly, f2ly, ...
+
+      std::vector<double> face_dist;
 
       int find_cell_face(int cell_num, int cell_face) {
         return cell_faces[cell_num*6 + cell_face];
