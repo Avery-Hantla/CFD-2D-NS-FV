@@ -9,6 +9,7 @@
             double R;
             double gamma;
             double k;
+            double mu;
 
             std::vector<double>p1; 
             std::vector<double>p2;
@@ -38,13 +39,23 @@
             std::vector<double> Qyp3;
             std::vector<double> Qyp4;
 
+            // Taus for viscous flow on faces
+            std::vector<double> tau_xx;
+            std::vector<double> tau_xy; 
+            std::vector<double> tau_yy; 
+
+            std::vector<double> dTdx;
+            std::vector<double> dTdy;
+
             void init(int size, class_flow* flow) {
                 gamma = flow->gamma;
+                R = flow->R;
+                mu = flow->mu;
+
                 P.assign(size,flow->P);
                 rho.assign(size,flow->rho);
                 u.assign(size,flow->u);
                 v.assign(size,flow->v);
-                R = flow->R;
 
                 Vn_avg.assign(size,std::sqrt(flow->v*flow->v+flow->u*flow->u));
                 c_avg.assign(size,std::sqrt(gamma*(flow->P/flow->rho)));
@@ -72,6 +83,13 @@
                 Qyp2.assign(size, 0);
                 Qyp3.assign(size, 0);
                 Qyp4.assign(size, 0);
+
+                tau_xx.assign(size, 0);
+                tau_xy.assign(size, 0);
+                tau_yy.assign(size, 0);
+
+                dTdx.assign(size, 0);
+                dTdy.assign(size, 0);
             }       
 
             void init(int size, double gamma_in, double R_in) {
@@ -141,8 +159,15 @@
                 p4 = E;
             }
 
-            int findQf(int cell_num, int face_num) { // Used to find Qi face (NOT CELL Q)
-                return cell_num*6 + face_num;
+            void comp_vis(int idx, double ux, double uy, double vx, double vy, double Px, double Py, double rhox, double rhoy) {
+                    tau_xx[idx] = 2*mu*(ux - (ux+vy)/3);
+                    tau_xy[idx] = mu*(uy+vx);
+                    tau_yy[idx] = 2*mu*(vy - (ux+vy)/3);
+                    dTdx[idx] = (Px*rho[idx] - rhox*P[idx])/(R*rho[idx]);
             }
+
+            // int findQf(int cell_num, int face_num) { // Used to find Qi face (NOT CELL Q)
+            //     return cell_num*6 + face_num;
+            // }
     };
 #endif
