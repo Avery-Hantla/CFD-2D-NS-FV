@@ -358,12 +358,19 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
 
   // Find the distances between cell centers
   mesh->face_dist.assign(num_faces, -101);
+  double tempx, tempy;
   for (int idx = 0; idx < num_faces; idx ++) {
     int cell1 = mesh->face_cell1[idx];
     int cell2 = mesh->face_cell2[idx];
 
-    double tempx = mesh->cell_centerx[cell2] - mesh->cell_centerx[cell1];
-    double tempy = mesh->cell_centery[cell2] - mesh->cell_centery[cell1];
+    if (cell2 >= 0) {
+      tempx = mesh->cell_centerx[cell2] - mesh->cell_centerx[cell1];
+      tempy = mesh->cell_centery[cell2] - mesh->cell_centery[cell1];
+    } else {
+      face_num = mesh->BC_faces[idx];
+      tempx = mesh->BC_cell_centerx[face_num] - mesh->cell_centerx[cell1];
+      tempy = mesh->BC_cell_centery[face_num] - mesh->cell_centery[cell1];
+    }
 
     mesh->face_dist[idx] = std::sqrt(tempx*tempx + tempy*tempy);
   }
@@ -376,8 +383,15 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
     // Find the lx and ly of the face
     int cell1 = mesh->face_cell1[idx];
     int cell2 = mesh->face_cell2[idx];
-    mesh->face_lx[idx] = mesh->cell_centerx[cell2] - mesh->cell_centerx[cell1];
-    mesh->face_ly[idx] = mesh->cell_centery[cell2] - mesh->cell_centery[cell1];
+
+    if (cell2 >= 0) {
+      mesh->face_lx[idx] = mesh->cell_centerx[cell2] - mesh->cell_centerx[cell1];
+      mesh->face_ly[idx] = mesh->cell_centery[cell2] - mesh->cell_centery[cell1];
+    } else {
+      face_num = mesh->BC_faces[idx];
+      mesh->face_lx[idx] = mesh->BC_cell_centerx[face_num] - mesh->cell_centerx[cell1];
+      mesh->face_ly[idx] = mesh->BC_cell_centery[face_num] - mesh->cell_centery[cell1];
+    }
 
     // Find the mx and my of the face
     mesh->face_mx[idx] = (mesh->x[mesh->face_point2[idx]] - mesh->x[mesh->face_point1[idx]]);
