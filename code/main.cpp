@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
     //////////// Initilize Variables, Objects, Structs /////////////
     class_mesh mesh; 
     class_Q Qbar;
+    class_Q Qface;
     class_Q Qface_c1;
     class_Q Qface_c2;
     class_flow freestream;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[]) {
         res_history.close();
 
         std::ofstream output;
-        output.open ("/sol/output.dat");
+        output.open ("sol/output.dat");
         if (output.is_open()) {
             output << "#iter, CL, CD" << std::endl;
         }
@@ -99,17 +100,18 @@ int main(int argc, char *argv[]) {
         restart.close();
 
         Qbar.updateflow();
-        Qface_c1.init(size.num_faces, &freestream);
-        Qface_c2.init(size.num_faces, &freestream);
     } else {
         Qbar.init(size.num_cells, &freestream);
-        Qface_c1.init(size.num_faces, &freestream);
-        Qface_c2.init(size.num_faces, &freestream);
-
         Qbar.updateQ();
 
         ndx = 1;
     }
+
+    if (inputs.eqn == 2) { // If NS
+        Qface.init(size.num_faces, &freestream);
+    }
+    Qface_c1.init(size.num_faces, &freestream);
+    Qface_c2.init(size.num_faces, &freestream);
 
     //////////////////////// Run Simulation ////////////////////////
     while (ndx <= inputs.nmax) {
@@ -117,7 +119,7 @@ int main(int argc, char *argv[]) {
             case 1:
                 // ssp_rk2(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC, &time);
             case 2:
-                ssp_rk3(&mesh, &Qbar, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC, &time);
+                ssp_rk3(&mesh, &Qbar, &Qface, &Qface_c1, &Qface_c2, &residual, &size, &inputs, &freestream, &BC, &time);
         }
 
         // Monitor and Output Solution
