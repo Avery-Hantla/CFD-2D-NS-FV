@@ -350,9 +350,9 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   }
 
   // Set number of wall elements
-  if (BC->BC1 == -2) {
+  if ((BC->BC1 == -2) || (BC->BC1 == -4)) {
     size->numWALL = size->numBC1;
-  } else if (BC->BC2 == -2) {
+  } else if ((BC->BC2 == -2) || (BC->BC2 == -4)) {
     size->numWALL = size->numBC2;
   }
 
