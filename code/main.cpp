@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
     int ndx;
     freestream.update_vis();
     freestream.updateQ();
+    freestream.free_comp();
     residual.init(size.num_cells);
     
     if (inputs.restart == 1) {
