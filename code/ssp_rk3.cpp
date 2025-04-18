@@ -34,8 +34,16 @@ void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1,
             dt[c2] += (std::abs(Qface_c2->Vn_avg[idx])+Qface_c2->c_avg[idx])*mesh->face_area[idx];
         }
     }
-    for (int idx = 0; idx < size->num_cells; idx ++) {
-        dt[idx] = (2*time->CFL*mesh->cell_vol[idx])/dt[idx];
+    
+    if (time->type == 1) { // GLOBAL Time step
+        double dt_temp = *std::max_element(dt.begin(),dt.end());
+        for (int idx = 0; idx < size->num_cells; idx ++) {
+            dt[idx] = (2*time->CFL*mesh->cell_vol[idx])/dt_temp;
+        }
+    } else if (time->type == 2) { // LOCAL Time step
+        for (int idx = 0; idx < size->num_cells; idx ++) {
+            dt[idx] = (2*time->CFL*mesh->cell_vol[idx])/dt[idx];
+        }
     }
 
     // Calcualte Q star 1

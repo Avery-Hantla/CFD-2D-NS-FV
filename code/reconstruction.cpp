@@ -92,6 +92,7 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qf
             Qface->updateflow();
 
             // Find dQdl and dQdm
+            double dn, dudn, dvdn, dudx, dudy, dvdx, dvdy;
             for (int idx = 0; idx < size->num_faces; idx ++) {
                 int cell1 = mesh->face_cell1[idx];
                 int cell2 = mesh->face_cell2[idx];
@@ -107,10 +108,18 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qf
                         Qface->comp_vis(idx, 0, 0, 0, 0, 0, 0, 0, 0);
                         break;
                     case -4: // NO_SLIP_WALL
-                        
-                        // Asumming Adiabatic
-                        Qface->dTdx[idx] = 0;
-                        Qface->dTdy[idx] = 0;
+                        dn = std::abs(std::sqrt(mesh->face_cell1_dx[idx] * mesh->face_cell1_dx[idx] + mesh->face_cell1_dy[idx] * mesh->face_cell1_dy[idx]));
+                        dudn = -Qbar->u[cell1]/dn;
+                        dvdn = -Qbar->v[cell1]/dn;
+
+                        dudx = dudn*mesh->face_nx[idx];
+                        dudy = dudn*mesh->face_ny[idx];
+
+                        dvdx = dvdn*mesh->face_nx[idx];
+                        dvdy = dvdn*mesh->face_ny[idx];
+
+                        // Compute tau xx, tau xy, tau yy, dTdx = 0, dTdy = 0
+                        Qface->comp_vis(idx, dudx, dudy, dvdx, dvdy, 0, 0, 0, 0);
                         break;
                     default:
                         // Find dQdl
@@ -126,24 +135,24 @@ void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qf
                         double dQdm_p4 = 0.5*( Qbar->Qxp4[cell1]*mesh->face_mx[idx]+Qbar->Qyp4[cell1]*mesh->face_my[idx] + Qbar->Qxp4[cell2]*mesh->face_mx[idx]+Qbar->Qyp4[cell2]*mesh->face_my[idx] );
 
                         // Find dQdx and dQdy
-                        double dQdy_p1 = dQdl_p1*mesh->face_ly[idx] - (dQdm_p1*mesh->face_lx[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdy_p2 = dQdl_p2*mesh->face_ly[idx] - (dQdm_p2*mesh->face_lx[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdy_p3 = dQdl_p3*mesh->face_ly[idx] - (dQdm_p3*mesh->face_lx[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdy_p4 = dQdl_p4*mesh->face_ly[idx] - (dQdm_p4*mesh->face_lx[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
+                        double dQdy_p1 = dQdl_p1*mesh->face_ly[idx] + dQdm_p1*mesh->face_ly[idx];
+                        double dQdy_p2 = dQdl_p2*mesh->face_ly[idx] + dQdm_p2*mesh->face_ly[idx];
+                        double dQdy_p3 = dQdl_p3*mesh->face_ly[idx] + dQdm_p3*mesh->face_ly[idx];
+                        double dQdy_p4 = dQdl_p4*mesh->face_ly[idx] + dQdm_p4*mesh->face_ly[idx];
 
-                        double dQdx_p1 = dQdl_p1*mesh->face_lx[idx] + (dQdm_p1*mesh->face_ly[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdx_p2 = dQdl_p2*mesh->face_lx[idx] + (dQdm_p2*mesh->face_ly[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdx_p3 = dQdl_p3*mesh->face_lx[idx] + (dQdm_p3*mesh->face_ly[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
-                        double dQdx_p4 = dQdl_p4*mesh->face_lx[idx] + (dQdm_p4*mesh->face_ly[idx]*mesh->face_ly[idx]) / mesh->face_mx[idx];
+                        double dQdx_p1 = dQdl_p1*mesh->face_lx[idx] + dQdm_p1*mesh->face_lx[idx];
+                        double dQdx_p2 = dQdl_p2*mesh->face_lx[idx] + dQdm_p2*mesh->face_lx[idx];
+                        double dQdx_p3 = dQdl_p3*mesh->face_lx[idx] + dQdm_p3*mesh->face_lx[idx];
+                        double dQdx_p4 = dQdl_p4*mesh->face_lx[idx] + dQdm_p4*mesh->face_lx[idx];
 
                         // Find ux, uy, vx, vy, dTdx, dTdy
                         double drhodx = dQdx_p1;
-                        double dudx = dQdx_p2 - drhodx * Qface->u[idx] / Qface->rho[idx];
-                        double dvdx = dQdx_p3 - drhodx * Qface->v[idx] / Qface->rho[idx];
+                        dudx = dQdx_p2 - drhodx * Qface->u[idx] / Qface->rho[idx];
+                        dvdx = dQdx_p3 - drhodx * Qface->v[idx] / Qface->rho[idx];
 
                         double drhody = dQdy_p1;
-                        double dudy = dQdy_p2 - drhody * Qface->u[idx] / Qface->rho[idx];
-                        double dvdy = dQdy_p3 - drhody * Qface->u[idx] / Qface->rho[idx];
+                        dudy = dQdy_p2 - drhody * Qface->u[idx] / Qface->rho[idx];
+                        dvdy = dQdy_p3 - drhody * Qface->u[idx] / Qface->rho[idx];
 
                         double dPdx = (freestream->gamma-1)*(dQdx_p4 - 0.5*drhodx*(Qface->u[idx]*Qface->u[idx]+Qface->v[idx]*Qface->v[idx]) - Qface->rho[idx]*(Qface->u[idx]*dudx + Qface->v[idx]*dvdx) );
                         double dPdy = (freestream->gamma-1)*(dQdy_p4 - 0.5*drhody*(Qface->u[idx]*Qface->u[idx]+Qface->v[idx]*Qface->v[idx]) - Qface->rho[idx]*(Qface->u[idx]*dudy + Qface->v[idx]*dvdy) );
