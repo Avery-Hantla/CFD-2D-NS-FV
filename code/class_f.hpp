@@ -56,8 +56,6 @@
                     v3[idx] = Qface->tau_xy[idx] * mesh->face_nx[idx] + Qface->tau_yy[idx] * mesh->face_ny[idx];
                     v4[idx] = mesh->face_nx[idx]*(Qface->u[idx] * Qface->tau_xx[idx] + Qface->v[idx] * Qface->tau_xy[idx] + Qface->k * Qface->dTdx[idx]) + mesh->face_ny[idx] * (Qface->u[idx] * Qface->tau_xy[idx] + Qface->v[idx] * Qface->tau_yy[idx] + Qface->k * Qface->dTdy[idx]);
                 }
-            }
-
-            
+            }  
     };
 #endif
