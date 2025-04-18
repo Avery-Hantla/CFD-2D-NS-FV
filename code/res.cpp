@@ -14,7 +14,7 @@
 
 #include "reconstruction.cpp"
 #include "rusanov.cpp"
-#include "roe_flux.cpp"
+// #include "roe_flux.cpp"
 #include "squeeze.cpp"
 
 void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC) {
@@ -28,16 +28,23 @@ void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_i
             break;
         case 2:
             compute_gradient(Qbar, mesh, freestream, size, inputs);
-            reconstruction(mesh, Qbar, Qface, Qface_c1, Qface_c2, freestream, size, inputs, BC);
 
             switch (inputs->limiter) {
+                case 0: // None
+                    break;
                 case 1: // Minmod
 
                     break;
                 case 2: // Squeeze
                     squeeze(mesh, Qbar, Qface_c1, Qface_c2, size);
                     break;
+
+                default:
+                    std::cout << "ERROR: LIMITER NOT IMPLENTED";
+                    break;
             }
+
+            reconstruction(mesh, Qbar, Qface, Qface_c1, Qface_c2, freestream, size, inputs, BC);
 
             switch (inputs->eqn) {
                 case 2: // NS
@@ -56,6 +63,7 @@ void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_i
             rusanov(&F_reimann, Qface_c1, Qface_c2, mesh, freestream, size, BC); 
             break;
         case 2: // Roe Flux
+            // roe(&F_reimann, Qface_c1, Qface_c2, mesh, freestream, size, BC);
             break;
     }
 
