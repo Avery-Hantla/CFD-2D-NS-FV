@@ -413,9 +413,9 @@ void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct
   std::ofstream output;
   output.open ("mesh/cell_data.dat");
   if (output.is_open()) {
-    output << "# cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
+    output << "# cell_vol, cell_centerx, cell_centery, x points for cell, y points for cell" << std::endl;
     for (int idx = 0; idx < size->num_cells; idx++) {
-      output << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << " ";   
+      output << mesh->cell_vol[idx] << " " << mesh->cell_centerx[idx] << " " << mesh->cell_centery[idx] << " ";   
       output << save_cell_pointsx[idx*6] << " " << save_cell_pointsx[idx*6+1] << " " << save_cell_pointsx[idx*6+2] << " " << save_cell_pointsx[idx*6+3] << " " << save_cell_pointsx[idx*6+4] << " " << save_cell_pointsx[idx*6+5] << " ";
       output << save_cell_pointsy[idx*6] << " " << save_cell_pointsy[idx*6+1] << " " << save_cell_pointsy[idx*6+2] << " " << save_cell_pointsy[idx*6+3] << " " << save_cell_pointsy[idx*6+4] << " " << save_cell_pointsy[idx*6+5] << std::endl;
     }

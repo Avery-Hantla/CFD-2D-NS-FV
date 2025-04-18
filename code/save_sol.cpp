@@ -19,7 +19,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
 
         /////////////////////// Reconstruct to nodes ///////////////////////
         double face_reconst_p1, face_reconst_p2, face_reconst_p3, face_reconst_p4;
-        double rho, E, u, v, P, force, L = 0, D = 0, CL, CD, tau_w;
+        double rho, E, u, v, P, force, Fy = 0, Fx = 0, L, D, CL, CD, tau_w;
         for (int idx = 0; idx < size->numWALL; idx++) {
             int face = mesh->BC_faces[idx];
 
@@ -47,25 +47,40 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
                 double dn = std::abs(std::sqrt(mesh->face_cell1_dx[face] * mesh->face_cell1_dx[face] + mesh->face_cell1_dy[face] * mesh->face_cell1_dy[face]));
                 double dudn = -Qbar->u[cell1]/dn;
                 double dvdn = -Qbar->v[cell1]/dn;
-                tau_w += Qbar->mu * std::sqrt(std::abs(dudn*dudn + dvdn*dvdn));
-                D += tau_w*mesh->face_area[face]*mesh->face_nx[face];
-                L += tau_w*mesh->face_area[face]*mesh->face_ny[face];
+                tau_w = Qbar->mu * std::sqrt(std::abs(dudn*dudn + dvdn*dvdn));
+                if (mesh->face_ny[face] < 0) {
+                    Fx += tau_w*mesh->face_area[face]*(-mesh->face_ny[face]);
+                    Fy += tau_w*mesh->face_area[face]*(mesh->face_nx[face]);
+                } else {
+                    Fx += tau_w*mesh->face_area[face]*(mesh->face_ny[face]);
+                    Fy += tau_w*mesh->face_area[face]*(-mesh->face_nx[face]);
+                }
             }
 
-            // Find CL and CD
+            // Find Fx and Fy
             force = P*mesh->face_area[face];
-            L += force*mesh->face_ny[face];
-            D += force*mesh->face_nx[face];
+            Fy += force*mesh->face_ny[face];
+            Fx += force*mesh->face_nx[face];
         }
 
+        L = Fx*(-freestream->flowy) + Fy*freestream->flowx;
+        D = Fy*freestream->flowy + Fx*freestream->flowx;
         CL = L/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
         CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
 
         //////////////// Output ////////////////
-        double res1 = *std::max_element(residual->p1.begin(),residual->p1.end());
-        double res2 = *std::max_element(residual->p2.begin(),residual->p2.end());
-        double res3 = *std::max_element(residual->p3.begin(),residual->p3.end());
-        double res4 = *std::max_element(residual->p4.begin(),residual->p4.end());
+        // Find L2 Norm of residuals
+        double res1 = 0, res2 = 0, res3 = 0, res4 = 0;
+        for (int idx = 0; idx < size->num_cells; idx++) {
+            res1 += residual->p1[idx] * residual->p1[idx];
+            res2 += residual->p2[idx] * residual->p2[idx];
+            res3 += residual->p3[idx] * residual->p3[idx];
+            res4 += residual->p4[idx] * residual->p4[idx];
+        }
+        res1 = std::sqrt(res1);
+        res2 = std::sqrt(res2);
+        res3 = std::sqrt(res3);
+        res4 = std::sqrt(res4);
 
         // Print to terminal
         std::cout << "iter: " << ndx << ", CL: " << CL << ", CD: " << CD << ", res: " << res1 << ", " << res2 << ", " << res3 << ", " << res4 << std::endl;

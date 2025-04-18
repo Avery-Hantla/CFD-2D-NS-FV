@@ -22,6 +22,9 @@
       double T;
       double k;
 
+      double flowx;
+      double flowy;
+
       void updateQ() {
         Q1 = rho;
         Q2 = rho*u;
@@ -34,6 +37,12 @@
         Cp = R*gamma/(gamma-1);
         T = P/(rho*R);
         k = (mu*Cp)/Pr;
+      }
+
+      void free_comp() {
+        double norm = std::sqrt(u*u+v*v);
+        flowx = u/norm;
+        flowy = v/norm;
       }
   };
 #endif
