@@ -61,6 +61,18 @@ void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, s
                 Qjmi_p3 = 0;
                 Qjmi_p4 = 0;
                 break;
+            case -4: // NO SLIP WALL BC
+                wall_BC.rho = Qbar->rho[idx];
+                wall_BC.P = Qbar->P[idx];
+                wall_BC.u = -Qbar->u[idx];
+                wall_BC.v = -Qbar->v[idx];
+                wall_BC.updateQ();
+
+                Qjmi_p1 = wall_BC.Q1 - Qbar->p1[cell_1];
+                Qjmi_p2 = wall_BC.Q2 - Qbar->p2[cell_1];
+                Qjmi_p3 = wall_BC.Q3 - Qbar->p3[cell_1];
+                Qjmi_p4 = wall_BC.Q4 - Qbar->p4[cell_1];
+                break;
             default:
                 Qjmi_p1 = Qbar->p1[cell_2] - Qbar->p1[cell_1];
                 Qjmi_p2 = Qbar->p2[cell_2] - Qbar->p2[cell_1];
