@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
             }
         }
         restart.close();
+        ndx++;
 
         Qbar.updateflow();
     } else {
