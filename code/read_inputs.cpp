@@ -22,7 +22,7 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                 if (in_string1 == "[case]") { // Input inputs secction
                     for (int jdx = 0; jdx < 3*5; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
-                        (in_string1 == "solution_order") ? inputs->order = stoi(in_string2): false;
+                        (in_string1 == "solution_poly_order") ? inputs->order = stoi(in_string2)+1: false;
                         (in_string1 == "nmax") ? inputs->nmax = stoi(in_string2): false;
                         (in_string1 == "monitor_step") ? inputs->monitor_step = stoi(in_string2): false;
                         (in_string1 == "output_step") ? inputs->output_step = stoi(in_string2): false;
@@ -32,7 +32,7 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                     std::cout << "  nmax = " << inputs->nmax << std::endl;
                     std::cout << "  monitor_step = " << inputs->monitor_step << std::endl;
                     std::cout << "  output_step = " << inputs->output_step << std::endl;
-                    std::cout << "  solution_order = " << inputs->order << std::endl;
+                    std::cout << "  solution_poly_order = " << inputs->order-1 << std::endl;
                     std::cout << "  restart = " << inputs->restart << std::endl;
                 }
                 /////////////////////////////////// Limiter ///////////////////////////////////
@@ -126,9 +126,19 @@ void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, s
                 /////////////////////////////////// Time ///////////////////////////////////
                 if (in_string1 == "[time]") { // Input inputs secction
                     std::cout << "[time] \n";
-                    for (int jdx = 0; jdx < 3*2; jdx+=3) { // Less than 3*(num of inputs)
+                    for (int jdx = 0; jdx < 3*3; jdx+=3) { // Less than 3*(num of inputs)
                         input_file >> in_string1 >> throw_away >> in_string2;
                         (in_string1 == "CFL") ? time->CFL = stod(in_string2): false;
+                        if (in_string1 == "time_step_type") {
+                            if (in_string2 == "GLOBAL") {
+                                std::cout << "  time_step_type = GLOBAL \n";
+                                time->type = 1;
+                            }
+                            if (in_string2 == "LOCAL") {
+                                std::cout << "  time_step_type = LOCAL \n";
+                                time->type = 2;
+                            }
+                        }
                         if (in_string1 == "time_scheme") {
                             if (in_string2 == "SSP_RK2") {
                                 std::cout << "  scheme = SSP_RK2 \n";
