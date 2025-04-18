@@ -51,6 +51,7 @@
                 gamma = flow->gamma;
                 R = flow->R;
                 mu = flow->mu;
+                k = flow->k;
 
                 P.assign(size,flow->P);
                 rho.assign(size,flow->rho);
@@ -163,7 +164,8 @@
                     tau_xx[idx] = 2*mu*(ux - (ux+vy)/3);
                     tau_xy[idx] = mu*(uy+vx);
                     tau_yy[idx] = 2*mu*(vy - (ux+vy)/3);
-                    dTdx[idx] = (Px*rho[idx] - rhox*P[idx])/(R*rho[idx]);
+                    dTdx[idx] = (Px*rho[idx] - rhox*P[idx])/(R*rho[idx]*rho[idx]);
+                    dTdy[idx] = (Py*rho[idx] - rhoy*P[idx])/(R*rho[idx]*rho[idx]);
             }
 
             // int findQf(int cell_num, int face_num) { // Used to find Qi face (NOT CELL Q)
