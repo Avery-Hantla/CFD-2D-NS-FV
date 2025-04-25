@@ -5,6 +5,7 @@
 */ //////////////////////////////////////////////////////////
 #include <iostream>
 #include <filesystem>
+#include <cuda_runtime.h>
 // #include <cgnslib.h>
 
 // Load classes, structs, etc
@@ -29,6 +30,10 @@
 // #include "writecgns.cpp"
 
 int main(int argc, char *argv[]) { 
+
+    #ifdef USE_GPU
+        std::cout << "Test\n";
+    #endif
     //////////// Initilize Variables, Objects, Structs /////////////
     class_mesh mesh; 
     class_Q Qbar;

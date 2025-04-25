@@ -26,5 +26,4 @@ void post(class_Q* Qbar, class_residual* residual, struct_inputs* inputs, struct
     }
     restart.close();
 
-    // Ou
 }
