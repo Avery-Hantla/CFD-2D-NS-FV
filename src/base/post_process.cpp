@@ -5,10 +5,10 @@
 #include <fstream>
 #include <filesystem> 
 
-#include "class_q.hpp"
-#include "class_residual.hpp"
-#include "struct_inputs.hpp"
-#include "struct_size.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_residual.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_size.hpp"
 
 void post(class_Q* Qbar, class_residual* residual, struct_inputs* inputs, struct_size* size, int ndx) {
     // Save Restart File

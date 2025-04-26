@@ -3,14 +3,14 @@
 /////////////////////////////////////////////////////////
 #include <iostream>
 
-#include "class_mesh.hpp"
-#include "class_q.hpp"
-#include "class_flow.hpp"
-#include "struct_inputs.hpp"
-#include "struct_size.hpp"
-#include "struct_BC.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_flow.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_BC.hpp"
 
-#include "cell_gradient.cpp"
+#include "../solver/cell_gradient.cpp"
 
 void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qfaces_c1, class_Q* Qfaces_c2, class_flow* freestream, struct_size* size, struct_inputs* inputs, struct_BC* BC) {
     int cell_1, cell_2;

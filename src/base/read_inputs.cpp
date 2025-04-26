@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include "class_flow.hpp"
-#include "struct_BC.hpp"
-#include "struct_inputs.hpp"
-#include "struct_time.hpp"
-#include "struct_report.hpp"
+
+#include "../support/class_flow.hpp"
+#include "../support/struct_BC.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_time.hpp"
+#include "../support/struct_report.hpp"
 
 void read_inputs(class_flow* freestream, struct_inputs* inputs, struct_BC* BC, struct_time* time, struct_report* report, int argc, char** argv) {
     std::ifstream input_file;

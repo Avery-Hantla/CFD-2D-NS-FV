@@ -1,12 +1,12 @@
 #include <vector>
 
-#include "class_mesh.hpp"
-#include "class_q.hpp"
-#include "class_flow.hpp"
-#include "struct_size.hpp"
-#include "struct_inputs.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_flow.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_inputs.hpp"
 
-#include "minmod.cpp"
+#include "../solver/minmod.cpp"
 
 void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, struct_size* size, struct_inputs* inputs) {
     int cell_1, cell_2;

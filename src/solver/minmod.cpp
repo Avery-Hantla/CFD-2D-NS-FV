@@ -2,8 +2,8 @@
 #include <cmath>
 #include <algorithm>
 
-#include "class_mesh.hpp"
-#include "struct_size.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/struct_size.hpp"
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));

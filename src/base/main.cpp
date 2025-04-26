@@ -5,35 +5,31 @@
 */ //////////////////////////////////////////////////////////
 #include <iostream>
 #include <filesystem>
-#include <cuda_runtime.h>
 // #include <cgnslib.h>
 
 // Load classes, structs, etc
-#include "class_mesh.hpp"
-#include "class_q.hpp"
-#include "class_f.hpp"
-#include "class_flow.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_f.hpp"
+#include "../support/class_flow.hpp"
 
-#include "struct_BC.hpp"
-#include "struct_size.hpp"
-#include "struct_inputs.hpp"
-#include "struct_time.hpp"
-#include "struct_report.hpp"
+#include "../support/struct_BC.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_time.hpp"
+#include "../support/struct_report.hpp"
 
 // Load Functions 
 #include "read_inputs.cpp"
 #include "readmesh.cpp"
-// #include "ssp_rk2.cpp"
-#include "ssp_rk3.cpp"
 #include "save_sol.cpp"
 #include "post_process.cpp"
 // #include "writecgns.cpp"
 
-int main(int argc, char *argv[]) { 
+// #include "../solver/ssp_rk2.cpp"
+#include "../solver/ssp_rk3.cpp"
 
-    #ifdef USE_GPU
-        std::cout << "Test\n";
-    #endif
+int main(int argc, char *argv[]) { 
     //////////// Initilize Variables, Objects, Structs /////////////
     class_mesh mesh; 
     class_Q Qbar;

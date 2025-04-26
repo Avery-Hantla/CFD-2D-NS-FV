@@ -4,16 +4,16 @@
 #include <vector>
 #include <algorithm>
 
-#include "class_q.hpp"
-#include "class_mesh.hpp"
-#include "class_flow.hpp"
-#include "class_residual.hpp"
-#include "struct_size.hpp"
-#include "struct_inputs.hpp"
-#include "struct_BC.hpp"
-#include "struct_time.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_flow.hpp"
+#include "../support/class_residual.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_BC.hpp"
+#include "../support/struct_time.hpp"
 
-#include "res.cpp"
+#include "../solver/res.cpp"
 
 void ssp_rk3(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1, class_Q* Qface_c2, class_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC, struct_time* time) {
     // Initilize Variables

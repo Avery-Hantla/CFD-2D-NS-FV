@@ -4,12 +4,12 @@
 
 #include <Eigen>
 
-#include "class_q.hpp"
-#include "class_mesh.hpp"
-#include "class_f.hpp"
-#include "class_flow.hpp"
-#include "struct_size.hpp"
-#include "struct_BC.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_f.hpp"
+#include "../support/class_flow.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_BC.hpp"
 
 void roe(class_F* F_roe, class_Q* Qface_c1, class_Q* Qface_c2, class_mesh* mesh, class_flow* freestream, struct_size* size, struct_BC* BC) {
     class_F F_c1, F_c2;

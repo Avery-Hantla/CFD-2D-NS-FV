@@ -3,19 +3,20 @@
 /////////////////////////////////////////////////////////
 #include <vector> 
 
-#include "class_q.hpp"
-#include "class_mesh.hpp"
-#include "class_f.hpp"
-#include "class_residual.hpp"
-#include "struct_size.hpp"
-#include "struct_inputs.hpp"
-#include "class_flow.hpp"
-#include "struct_BC.hpp"
+#include "../support/class_q.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_f.hpp"
+#include "../support/class_residual.hpp"
+#include "../support/class_flow.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_inputs.hpp"
+#include "../support/struct_BC.hpp"
 
-#include "reconstruction.cpp"
-#include "rusanov.cpp"
-// #include "roe_flux.cpp"
-#include "squeeze.cpp"
+#include "../base/rusanov.hpp"
+
+#include "../solver/reconstruction.cpp"
+// #include "../solver/roe_flux.cpp"
+#include "../solver/squeeze.cpp"
 
 void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC) {
     class_F F_reimann;

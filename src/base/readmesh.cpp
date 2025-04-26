@@ -8,10 +8,10 @@
 //#include <numeric>
 //#include <algorithm>
 
-#include "class_mesh.hpp"
-#include "struct_size.hpp"
-#include "struct_BC.hpp"
-#include "struct_inputs.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/struct_size.hpp"
+#include "../support/struct_BC.hpp"
+#include "../support/struct_inputs.hpp"
 
 void readmesh(class_mesh* mesh, std::string grid_file, struct_size* size, struct_BC* BC, struct_inputs* inputs) {
   int num_points, num_faces, num_cells;

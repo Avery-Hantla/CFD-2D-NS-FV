@@ -2,9 +2,9 @@
 #include <algorithm>
 // #include <cmath>
 
-#include "class_mesh.hpp"
-#include "class_q.hpp"
-#include "struct_size.hpp"
+#include "../support/class_mesh.hpp"
+#include "../support/class_q.hpp"
+#include "../support/struct_size.hpp"
 
 void squeeze(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, struct_size* size) {
     std::vector<double> Qmin_p1(size->num_cells, 100000000000), Qmin_p2(size->num_cells, 100000000000), Qmin_p3(size->num_cells, 100000000000), Qmin_p4(size->num_cells, 100000000000);
