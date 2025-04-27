@@ -1,15 +1,9 @@
-cmake_minimum_required(VERSION 3.10.0)
-# set(CMAKE_C_COMPILER "nvcc")
-# set(CMAKE_CXX_COMPILER "nvcc")
-project(fv2d VERSION 0.1.0 LANGUAGES CXX CUDA)
+cmake_minimum_required(VERSION 3.22)
+project(CUDA VERSION 0.1.0 LANGUAGES CXX CUDA)
 
-# if(NOT DEFINED CMAKE_CUDA_STANDARD)
-#     set(CMAKE_CUDA_STANDARD 11)
-#     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-# endif()
+ADD_LIBRARY(cuda_lib STATIC rusanov.cu)
 
-# Add static libarys
-ADD_LIBRARY(_cuda STATIC rusanov.cu)
+set_target_properties(cuda_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(cuda_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-include(CTest)
-enable_testing()
+# set(CUDA_LIB ${CMAKE_CURRENT_BINARY_DIR}/cuda.lib PARENT_SCOPE)

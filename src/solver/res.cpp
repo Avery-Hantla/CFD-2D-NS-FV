@@ -12,9 +12,9 @@
 #include "../support/struct_inputs.hpp"
 #include "../support/struct_BC.hpp"
 
-#include "../base/rusanov.hpp"
+#include "../head/rusanov.hpp"
+#include "../head/reconstruction.hpp"
 
-#include "../solver/reconstruction.cpp"
 // #include "../solver/roe_flux.cpp"
 #include "../solver/squeeze.cpp"
 

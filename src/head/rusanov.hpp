@@ -1,7 +1,1 @@
-#ifdef USE_GPU
-    #include "../cuda/rusanov.cu"
-#else
-    #include "../solver/rusanov.cpp"
-#endif
-
 void rusanov(class_F* F_rusanov, class_Q* Qface_c1, class_Q* Qface_c2, class_mesh* mesh, class_flow* freestream, struct_size* size, struct_BC* BC);

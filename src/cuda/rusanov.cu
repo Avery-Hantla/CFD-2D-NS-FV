@@ -9,10 +9,30 @@
 #include "../support/struct_size.hpp"
 #include "../support/struct_BC.hpp"
 
+// #include "../solver/rusanov.hpp"
+
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <stdio.h>
-#include "cuda.cu"
+// #include "cuda.cuh"
+
+// temp move to function in main.cpp
+int maxThreadsperblock() {
+    // current CUDA device ID
+    int device;
+
+    // object to store properties of the CUDA device
+    cudaDeviceProp props;
+
+    // ID of the currently active CUDA device
+    cudaGetDevice(&device);
+
+    // Retrieve properties and store in 'props'
+    cudaGetDeviceProperties(&props, device);
+
+    // Return max number of threads per block
+    return props.maxThreadsPerBlock;
+}
 
 __global__ void d_rusanov(int N, double d_cl_Vn[], double d_c2_Vn[], double d_c1_c[], double d_c2_c[], double d_Vn_avg[], double d_c_avg[], double d_Q_c1_p1[], double d_Q_c1_p2[], double d_Q_c1_p3[], double d_Q_c1_p4[], double d_Q_c2_p1[], double d_Q_c2_p2[], double d_Q_c2_p3[], double d_Q_c2_p4[], double d_F_c1_p1[], double d_F_c1_p2[], double d_F_c1_p3[], double d_F_c1_p4[], double d_F_c2_p1[], double d_F_c2_p2[], double d_F_c2_p3[], double d_F_c2_p4[], double d_F_rusanov_p1[], double d_F_rusanov_p2[], double d_F_rusanov_p3[], double d_F_rusanov_p4[]) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -32,7 +52,7 @@ __global__ void d_rusanov(int N, double d_cl_Vn[], double d_c2_Vn[], double d_c1
         d_F_rusanov_p3[idx] = (d_F_c1_p3[idx]+d_F_c2_p3[idx])/2 - (std::abs(Vn_avg) + c_avg)/2 * (d_Q_c2_p3[idx] - d_Q_c1_p3[idx]);
         d_F_rusanov_p4[idx] = (d_F_c1_p4[idx]+d_F_c2_p4[idx])/2 - (std::abs(Vn_avg) + c_avg)/2 * (d_Q_c2_p4[idx] - d_Q_c1_p4[idx]);
 
-        printf("Hello from block: %u, thread: %u\n", blockIdx.x, threadIdx.x);
+        // printf("Hello from block: %u, thread: %u\n", blockIdx.x, threadIdx.x);
     }
 }
 
