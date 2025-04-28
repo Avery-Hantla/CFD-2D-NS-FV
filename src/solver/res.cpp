@@ -12,11 +12,11 @@
 #include "../support/struct_inputs.hpp"
 #include "../support/struct_BC.hpp"
 
-#include "../head/rusanov.hpp"
-#include "../head/reconstruction.hpp"
-
+#include "../include/rusanov.hpp"
+#include "../include/reconstruction.hpp"
+#include "../include/cell_gradient.hpp"
 // #include "../solver/roe_flux.cpp"
-#include "../solver/squeeze.cpp"
+#include "../include/squeeze.hpp"
 
 void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC) {
     class_F F_reimann;

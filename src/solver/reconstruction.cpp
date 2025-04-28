@@ -10,7 +10,7 @@
 #include "../support/struct_size.hpp"
 #include "../support/struct_BC.hpp"
 
-#include "../solver/cell_gradient.cpp"
+#include "../include/cell_gradient.hpp"
 
 void reconstruction(class_mesh* mesh, class_Q* Qbar, class_Q* Qface, class_Q* Qfaces_c1, class_Q* Qfaces_c2, class_flow* freestream, struct_size* size, struct_inputs* inputs, struct_BC* BC) {
     int cell_1, cell_2;

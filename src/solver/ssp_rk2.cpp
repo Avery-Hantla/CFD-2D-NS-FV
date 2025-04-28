@@ -13,7 +13,7 @@
 #include "../support/struct_BC.hpp"
 #include "../support/struct_time.hpp"
 
-#include "../solver/res.cpp"
+#include "../include/res.hpp"
 
 void ssp_rk2(class_mesh* mesh, class_Q* Qbar, class_Q* Qface_c1, class_Q* Qface_c2, class_residual* residual, struct_size* size, struct_inputs* inputs, class_flow* freestream, struct_BC* BC, struct_time* time) {
     // Initilize Variables

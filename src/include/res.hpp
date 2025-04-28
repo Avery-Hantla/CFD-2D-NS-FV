@@ -1,0 +1,1 @@
+void res(class_residual* residual, class_mesh* mesh, struct_size* size, struct_inputs* inputs, class_Q* Qbar, class_Q* Qface, class_Q* Qface_c1, class_Q* Qface_c2, class_flow* freestream, struct_BC* BC);

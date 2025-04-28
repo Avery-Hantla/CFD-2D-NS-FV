@@ -26,8 +26,8 @@
 #include "post_process.cpp"
 // #include "writecgns.cpp"
 
-// #include "../solver/ssp_rk2.cpp"
-#include "../solver/ssp_rk3.cpp"
+// #include "../include/ssp_rk2.hpp"
+#include "../include/ssp_rk3.hpp"
 
 int main(int argc, char *argv[]) { 
     //////////// Initilize Variables, Objects, Structs /////////////

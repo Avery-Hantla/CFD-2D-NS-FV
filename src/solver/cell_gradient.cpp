@@ -6,8 +6,6 @@
 #include "../support/struct_size.hpp"
 #include "../support/struct_inputs.hpp"
 
-#include "../solver/minmod.cpp"
-
 void compute_gradient(class_Q* Qbar, class_mesh* mesh, class_flow* freestream, struct_size* size, struct_inputs* inputs) {
     int cell_1, cell_2;
     double Vn;
