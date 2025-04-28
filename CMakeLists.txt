@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 project(fv2d VERSION 0.1.0 LANGUAGES CXX CUDA)
 
-# Add subdirectory
-# add_subdirectory(src/cuda)
-
 # Link static libarys
 # find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 
 # Define preprocessor macro
 option(USE_GPU OFF)
-if(USE_GPU)
+if(USE_GPU) 
     find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
     add_subdirectory(src/cuda)
     add_definitions(-DUSE_GPU)
@@ -19,16 +16,15 @@ else()
 endif()
 
 # Find Header Files
-find_path(CGNS_HEAD_DIR cgnslib.h)
-find_path(EIGEN_HEAD_DIR Eigen)
+# find_path(CGNS_HEAD_DIR cgnslib.h)
 
 # Build executable
-# set(executable_output_path "../build/bin/")
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/bin/)
 add_executable(fv2d src/base/main.cpp)
 
-# Link header files
-target_include_directories(fv2d PUBLIC "${CGNS_HEAD_DIR}")
-target_include_directories(fv2d PUBLIC "${EIGEN_HEAD_DIR}")
+# Link config
+target_include_directories(fv2d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/config/cgns/include/)
+target_include_directories(fv2d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/config/eigen/)
 
 # Link static librarys
 if(USE_GPU)
@@ -36,6 +32,3 @@ if(USE_GPU)
 else()
     target_link_libraries(fv2d solverlib)
 endif()
-
-include(CTest)
-enable_testing()

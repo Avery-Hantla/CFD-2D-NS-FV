@@ -5,7 +5,8 @@
 */ //////////////////////////////////////////////////////////
 #include <iostream>
 #include <filesystem>
-// #include <cgnslib.h>
+#include <cgnslib.h>
+#include <Eigen>
 
 // Load classes, structs, etc
 #include "../support/class_mesh.hpp"
