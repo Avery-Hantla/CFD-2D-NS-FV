@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(CUDA VERSION 0.1.0 LANGUAGES CXX CUDA)
 
+# find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 ADD_LIBRARY(cuda_lib STATIC rusanov.cu)
 
 set_target_properties(cuda_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(CUDALIB VERSION 0.1.0 LANGUAGES CXX CUDA)
+project(solverlib)
 
 ADD_LIBRARY(solverlib STATIC res.cpp rusanov.cpp reconstruction.cpp squeeze.cpp ssp_rk3.cpp cell_gradient.cpp)
 

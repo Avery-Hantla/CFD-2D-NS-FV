@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(fv2d VERSION 0.1.0 LANGUAGES CXX CUDA)
+project(fv2d)
 
 # Add subdirectorys
 add_subdirectory(src/cgns-read/src)
@@ -16,7 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR}/contrib/hdf5/include)
 # Define preprocessor macro
 option(USE_GPU OFF)
 if(USE_GPU) 
-    find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+    # find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
     add_subdirectory(src/cuda)
     add_definitions(-DUSE_GPU)
 else()
