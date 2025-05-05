@@ -21,7 +21,7 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         double face_reconst_p1, face_reconst_p2, face_reconst_p3, face_reconst_p4;
         double rho, E, u, v, P, force, Fy = 0, Fx = 0, L, D, CL, CD, tau_w;
         for (int idx = 0; idx < size->numWALL; idx++) {
-            int face = mesh->BC_faces[idx];
+            int face = idx; // mesh->BC_faces[idx];
 
             int cell1 = mesh->face_cell1[face];
 
@@ -47,7 +47,12 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
                 double dn = std::abs(std::sqrt(mesh->face_cell1_dx[face] * mesh->face_cell1_dx[face] + mesh->face_cell1_dy[face] * mesh->face_cell1_dy[face]));
                 double dudn = -Qbar->u[cell1]/dn;
                 double dvdn = -Qbar->v[cell1]/dn;
-                tau_w = Qbar->mu * std::sqrt(std::abs(dudn*dudn + dvdn*dvdn));
+
+                double tau_x = Qbar->mu*dudn;
+                double tau_y = Qbar->mu*dvdn;
+                tau_w = std::sqrt(tau_x*tau_x + tau_y*tau_y);
+                // tau_w = Qbar->mu * std::sqrt(dudn*dudn + dvdn*dvdn);
+
                 if (mesh->face_ny[face] < 0) {
                     Fx += tau_w*mesh->face_area[face]*(-mesh->face_ny[face]);
                     Fy += tau_w*mesh->face_area[face]*(mesh->face_nx[face]);
@@ -65,8 +70,9 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
 
         L = Fx*(-freestream->flowy) + Fy*freestream->flowx;
         D = Fy*freestream->flowy + Fx*freestream->flowx;
-        CL = L/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
-        CD = D/(0.5*report->rho*std::sqrt(report->u * report->u + report->v * report->v)*std::sqrt(report->u * report->u + report->v * report->v)*report->length);
+        double Vmag = std::sqrt(report->u * report->u + report->v * report->v);
+        CL = L/(0.5*report->rho*Vmag*Vmag*report->length);
+        CD = D/(0.5*report->rho*Vmag*Vmag*report->length);
 
         //////////////// Output ////////////////
         // Find L2 Norm of residuals
@@ -155,7 +161,8 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
             P[idx] = (E[idx]-(0.5*rho[idx]*(u[idx]*u[idx]+v[idx]*v[idx])))*(Qbar->gamma-1);
         }
 
-        std::vector<double> tau_w(size->numWALL,0);
+        std::vector<double> tau_x(size->numWALL,0);
+        std::vector<double> tau_y(size->numWALL,0);
         if (inputs->eqn == 2) {
             for (int idx = 0; idx < size->numWALL; idx++) {
                 int face = mesh->BC_faces[idx];
@@ -164,7 +171,9 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
                 double dn = std::abs(std::sqrt(mesh->face_cell1_dx[face] * mesh->face_cell1_dx[face] + mesh->face_cell1_dy[face] * mesh->face_cell1_dy[face]));
                 double dudn = -Qbar->u[cell1]/dn;
                 double dvdn = -Qbar->v[cell1]/dn;
-                tau_w[idx] = Qbar->mu * std::sqrt(std::abs(dudn*dudn + dvdn*dvdn));
+                tau_x[idx] = Qbar->mu * dudn;
+                tau_y[idx] = Qbar->mu * dvdn;
+                // tau_w[idx] = Qbar->mu * std::sqrt(std::abs(dudn*dudn + dvdn*dvdn));
             }
         }
         
@@ -211,50 +220,50 @@ void save(class_Q* Qbar, class_mesh* mesh, class_residual* residual, class_flow*
         }
         if (output.is_open()) {
             output << "TITLE     = \"Translation of CGNS file merged_sol_aver.cgns\"" << std::endl;
-            output << "VARIABLES = \"CoordinateX\" \n \"CoordinateY\" \n \"rho\" \n \"u\" \n \"v\" \n \"P\" \n \"tau_w\"" << std::endl;
+            output << "VARIABLES = \"CoordinateX\" \n \"CoordinateY\" \n \"rho\" \n \"u\" \n \"v\" \n \"P\" \n \"tau_x\" \n \"tau_y\" " << std::endl;
             output << "ZONE T=\"ZONE1\"\nSTRANDID=0, SOLUTIONTIME=" << ndx << "\nI=" << size->numWALL+1 << ", J=1, K=1, ZONETYPE=Ordered\n";
             output << "DATAPACKING=POINT\nDT=(DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE )\n";
 
             for (int idx = 0; idx < size->numWALL+1; idx++) {
                 output << mesh->x[idx] << " " << mesh->y[idx] << " ";
-                output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << " " << tau_w[idx] << std::endl;
+                output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << " " << tau_x[idx] << " " << tau_y[idx] << std::endl;
             }
         } else {
             std::cout << "ERROR: Cannot Save Tecplot Surface File \n";
         }
         output.close();
 
-        /////////////////////// Save MATLAB Solution  ///////////////////////
-        // std::ofstream output;
-        // Save volume data
-        if (inputs->nmax == ndx) {
-            output.open ("sol/mat_sol.dat");
-        } else {
-            output.open ("sol/mat_sol_" + std::to_string(ndx) + ".dat");
-        }
-        if (output.is_open()) {
-            for (int idx = 0; idx < size->num_cells; idx++) {
-                output << Qbar->rho[idx] << " " << Qbar->u[idx] << " " << Qbar->v[idx] << " " << Qbar->P[idx] << std::endl;
-            }
-        } else {
-            std::cout << "ERROR: Cannot Save MATLAB File \n";
-        }
-        output.close();
+    //     /////////////////////// Save MATLAB Solution  ///////////////////////
+    //     // std::ofstream output;
+    //     // Save volume data
+    //     if (inputs->nmax == ndx) {
+    //         output.open ("sol/mat_sol.dat");
+    //     } else {
+    //         output.open ("sol/mat_sol_" + std::to_string(ndx) + ".dat");
+    //     }
+    //     if (output.is_open()) {
+    //         for (int idx = 0; idx < size->num_cells; idx++) {
+    //             output << Qbar->rho[idx] << " " << Qbar->u[idx] << " " << Qbar->v[idx] << " " << Qbar->P[idx] << std::endl;
+    //         }
+    //     } else {
+    //         std::cout << "ERROR: Cannot Save MATLAB File \n";
+    //     }
+    //     output.close();
 
-        // Save surface data
-        if (inputs->nmax == ndx) {
-            output.open ("sol/mat_surf.dat");
-        } else {
-            output.open ("sol/mat_surf_" + std::to_string(ndx) + ".dat");
-        }
-        if (output.is_open()) {
-            for (int idx = 0; idx < size->numWALL+1; idx++) {
-                output << mesh->x[idx] << " " << mesh->y[idx] << " ";
-                output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << " " << tau_w[idx] << std::endl;
-            }
-        } else {
-            std::cout << "ERROR: Cannot Save MATLAB Surface File \n";
-        }
-        output.close();
+    //     // Save surface data
+    //     if (inputs->nmax == ndx) {
+    //         output.open ("sol/mat_surf.dat");
+    //     } else {
+    //         output.open ("sol/mat_surf_" + std::to_string(ndx) + ".dat");
+    //     }
+    //     if (output.is_open()) {
+    //         for (int idx = 0; idx < size->numWALL+1; idx++) {
+    //             output << mesh->x[idx] << " " << mesh->y[idx] << " ";
+    //             output << rho[idx] << " " << u[idx] << " " << v[idx] << " " << P[idx] << " " << tau_w[idx] << std::endl;
+    //         }
+    //     } else {
+    //         std::cout << "ERROR: Cannot Save MATLAB Surface File \n";
+    //     }
+    //     output.close();
     }
 }

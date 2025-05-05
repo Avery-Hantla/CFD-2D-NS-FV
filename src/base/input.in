@@ -1,0 +1,40 @@
+[case]
+    nmax = 10000
+    monitor_step = 50
+    output_step = 1000
+    solution_poly_order = 1
+    restart = 0
+
+[grid]
+    grid_file = ../../grids/grid_file.in
+
+[equations]
+    eqn = NS
+    flux_solver = RUSANOV
+
+[fluid]
+    gamma = 1.4
+    R = 287
+    mu = 0.04168601
+    Pr = 0.72
+
+[init]
+    P = 101325
+    rho = 1.225
+    u = 170.147
+    v = 0
+
+[time]
+    time_scheme = SSP_RK3
+    time_step_type = LOCAL
+    CFL = 1
+
+[limiter]
+    limiter = NONE
+
+[report]
+    length = 1
+
+[BC]
+    BC1 = NO_SLIP_WALL
+    BC2 = FREESTREAM
