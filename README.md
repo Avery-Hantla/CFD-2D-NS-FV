@@ -11,7 +11,7 @@ To install and build the program make a nuild directory and use CMake to build
 mkdir build
 cmake ../
 make
-'''
+```
 
 The executable will be located in   
 
