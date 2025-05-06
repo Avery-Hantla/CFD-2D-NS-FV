@@ -1,14 +1,15 @@
 # CFD 2D Finite Volume Euler and Navier-Stokes Code with Arbitrary Mesh 
 
-This code is capable of handling an arbitrary mesh with cells containing and number of sides. There is both first and second-order reconstruction implemented along with the squeeze limiter. 
+This code is capable of handling an arbitrary mesh with cells containing n number of sides. There is both first and second-order reconstruction implemented along with the squeeze limiter. 
 
 Note that some features such as CGNS, GPU, and ROE Flux are still under development
 
 ## Installation  
-To install and build the program make a nuild directory and use CMake to build  
+To install and build the program make a build directory and use CMake to build  
 
 ```bash
 mkdir build
+cd build
 cmake ../
 make
 ```
@@ -21,7 +22,13 @@ CFD-2D-NS-FV/build/bin
  - CMake    
 
 ## Inputs
-An input file can be directly passed to the binary. If no input file is specified, then the binary will search for an "input.in" file in the working directory. A sample input file is provided in the repository, an input file is also shown below with all working options.  
+An input file can be directly passed to the binary and can be ran using.
+
+```bash
+./fv2d input.in
+```
+
+If no input file is specified, then the binary will search for an "input.in" file in the working directory. A sample input file is provided in the repository, an input file is also shown below with all working options.  
 
 [case]  
     nmax = Number of iterations to run   
