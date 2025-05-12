@@ -5,9 +5,11 @@ This code is capable of handling an arbitrary mesh with cells containing n numbe
 Note that some features such as CGNS, GPU, and ROE Flux are still under development
 
 ## Installation  
-To install and build the program make a build directory and use CMake to build  
+To install and build the program, clone the repo then make a build directory and use CMake to build  
 
 ```bash
+git clone https://github.com/Avery-Hantla/CFD-2D-NS-FV.git
+cd CFD-2D-NS-FV
 mkdir build
 cd build
 cmake ../
