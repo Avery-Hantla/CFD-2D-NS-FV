@@ -2,7 +2,10 @@
 
 This code is capable of handling an arbitrary mesh with cells containing n number of sides. There is both first and second-order reconstruction implemented along with the squeeze limiter. 
 
-Note that some features such as CGNS, GPU, and ROE Flux are still under development
+Note that some features such as CGNS, GPU, and ROE Flux are still under development  
+
+## Requirements  
+ - CMake  
 
 ## Installation  
 To install and build the program, clone the repo then make a build directory and use CMake to build  
@@ -19,9 +22,6 @@ make
 The executable will be located in   
 
 CFD-2D-NS-FV/build/bin  
-
-## Requirements  
- - CMake    
 
 ## Inputs
 An input file can be directly passed to the binary and can be ran using.
